@@ -107,6 +107,7 @@ size_t lex_delimiter(char *cmd, struct token_t *token) {
 struct token_t *lex(char *cmd, size_t len) {
   printf("%s(%d)\n", cmd, len);
   struct token_t *tokens=0;
+  size_t idx=0;
   char *cmd_copy=cmd;
   while(cmd_copy < cmd+len) {
     size_t read=0;
@@ -119,8 +120,13 @@ struct token_t *lex(char *cmd, size_t len) {
     if(token.type == TOKEN_UNSUPPORTED) {
       exit(71);
     }
+    idx++;
+    tokens=realloc(tokens, idx*sizeof(struct token_t));
+    tokens[idx-1]=token;
     cmd_copy+=read;
-    printf_token(token);
   }
+  idx++;
+  tokens=realloc(tokens, idx*sizeof(struct token_t));
+  tokens[idx-1].type=TOKEN_EOC;
   return tokens;
 }

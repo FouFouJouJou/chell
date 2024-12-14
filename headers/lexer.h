@@ -11,6 +11,7 @@ enum token_type_t {
   ,TOKEN_SEMI_COLON
   ,TOKEN_AND
   ,TOKEN_UNSUPPORTED
+  ,TOKEN_EOC
 };
 
 struct token_t {
@@ -19,5 +20,6 @@ struct token_t {
   enum token_type_t type;
 };
 
+void printf_token(struct token_t token);
 struct token_t *lex(char *cmd, size_t len);
 #endif
