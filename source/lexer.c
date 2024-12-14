@@ -7,10 +7,14 @@ char *token_type_to_string(enum token_type_t type) {
   switch(type) {
     case TOKEN_STRING:
       return "TOKEN_STRING";
-    case TOKEN_OUT_REDIR:
-      return "TOKEN_OUT_REDIR";
-    case TOKEN_IN_REDIR:
-      return "TOKEN_IN_REDIR";
+    case TOKEN_OUT_APPEND_REDIR:
+      return "TOKEN_OUT_APPEND_REDIR";
+    case TOKEN_OUT_TRUNC_REDIR:
+      return "TOKEN_OUT_TRUNC_REDIR";
+    case TOKEN_IN_DOUBLE_REDIR:
+      return "TOKEN_IN_DOUBLE_REDIR";
+    case TOKEN_IN_FILE_REDIR:
+      return "TOKEN_IN_FILE_REDIR";
     case TOKEN_PIPE:
       return "TOKEN_PIPE";
     case TOKEN_SEMI_COLON:
@@ -37,7 +41,8 @@ struct token_t make_token(char *literal, size_t len, enum token_type_t type) {
 }
 
 size_t lex_string(char *cmd, struct token_t *token) {
-  char delimiters[]=" &><|";  
+  // TODO: double or single quote case
+  char delimiters[]=" &><|;";  
   size_t len=strcspn(cmd, delimiters);
   token->literal=strndup(cmd, len);
   token->len=len;
@@ -45,15 +50,57 @@ size_t lex_string(char *cmd, struct token_t *token) {
   return len;
 }
 
-size_t output_redirection(char *cmd, size_t len, struct token_t *token) {
+size_t lex_output_redirection(char *cmd, struct token_t *token) {
+  if(!strncmp(cmd, ">>", 2)) {
+    token->type=TOKEN_OUT_APPEND_REDIR;
+    token->len=2;
+    token->literal=strndup(cmd, 2);
+    return token->len;
+  }
+  if(!strncmp(cmd, ">", 1)) {
+    token->type=TOKEN_OUT_TRUNC_REDIR;
+    token->len=1;
+    token->literal=strndup(cmd, 1);
+    return token->len;
+  }
   return 0;
 }
 
-size_t input_redirection(char *cmd, size_t len, struct token_t *token) {
+size_t lex_input_redirection(char *cmd, struct token_t *token) {
+  if(!strncmp(cmd, "<<", 2)) {
+    token->type=TOKEN_IN_DOUBLE_REDIR;
+    token->len=2;
+    token->literal=strndup(cmd, 2);
+    return token->len;
+  }
+  if(!strncmp(cmd, "<", 1)) {
+    token->type=TOKEN_IN_FILE_REDIR;
+    token->len=1;
+    token->literal=strndup(cmd, 1);
+    return token->len;
+  }
   return 0;
 }
 
-size_t lex_pipe(char *cmd, size_t len, struct token_t *token) {
+size_t lex_delimiter(char *cmd, struct token_t *token) {
+  if(!strncmp(cmd, "&&", 2)) {
+    token->type=TOKEN_AND;
+    token->len=2;
+    token->literal=strndup(cmd, 2);
+    return token->len;
+  }
+  if(!strncmp(cmd, "|", 1)) {
+    token->type=TOKEN_PIPE;
+    token->len=1;
+    token->literal=strndup(cmd, 1);
+    return token->len;
+  }
+  if(!strncmp(cmd, ";", 1)) {
+    token->type=TOKEN_SEMI_COLON;
+    token->len=1;
+    token->literal=strndup(cmd, 1);
+    return token->len;
+  }
   return 0;
 }
 
@@ -62,10 +109,16 @@ struct token_t *lex(char *cmd, size_t len) {
   struct token_t *tokens=0;
   char *cmd_copy=cmd;
   while(cmd_copy < cmd+len) {
-    struct token_t token={.type=TOKEN_UNSUPPORTED};
     size_t read=0;
+    struct token_t token={.type=TOKEN_UNSUPPORTED};
     cmd_copy+=strspn(cmd_copy, " ");
-    if((read=lex_string(cmd, &token)));
+    if((read=lex_string(cmd_copy, &token)));
+    else if((read=lex_output_redirection(cmd_copy, &token)));
+    else if((read=lex_input_redirection(cmd_copy, &token)));
+    else if((read=lex_delimiter(cmd_copy, &token)));
+    if(token.type == TOKEN_UNSUPPORTED) {
+      exit(71);
+    }
     cmd_copy+=read;
     printf_token(token);
   }
