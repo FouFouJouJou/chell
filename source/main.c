@@ -3,7 +3,10 @@
 #include <lexer.h>
 
 int main(int argc, char **argv) {
-  printf("Hello world!\n");
-  lex(argv[1], strlen(argv[1]));
+  struct token_t *tokens=lex(argv[1], strlen(argv[1])), *token=tokens;
+  while(token->type != TOKEN_EOC) {
+    printf_token(*token);
+    token++;
+  }
   return 0;
 }
