@@ -2,21 +2,6 @@
 #define __PARSER_H__
 #include <tree.h>
 
-enum option_type_t {
-  OPTION_VARIABLE
-  ,OPTION_FLAG
-  ,OPTION_COMMAND
-};
-
-struct tree_t {
-  struct node_t *head;
-};
-
-struct option_t {
-  enum option_type_t type; 
-  struct node_t *node;
-};
-
 struct cmd_t {
   char *executable;
   char **argv;

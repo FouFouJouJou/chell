@@ -6,4 +6,4 @@ set(EXECUTABLE main)
 add_executable(${EXECUTABLE})
 
 target_include_directories(${EXECUTABLE} PUBLIC ${INCLUDE_DIR})
-target_sources(${EXECUTABLE} PUBLIC ${SOURCE_DIRECTORY}/${EXECUTABLE}.c ${SOURCE_DIRECTORY}/lexer.c ${SOURCE_DIRECTORY}/parser.c)
+target_sources(${EXECUTABLE} PUBLIC ${SOURCE_DIRECTORY}/${EXECUTABLE}.c ${SOURCE_DIRECTORY}/lexer.c ${SOURCE_DIRECTORY}/parser.c ${SOURCE_DIRECTORY}/tree.c)

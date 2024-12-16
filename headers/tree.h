@@ -7,6 +7,7 @@ enum node_type_t {
   ,NODE_SEMI_COLON
   ,NODE_REDIR
   ,NODE_CMD
+  ,NODE_UNSUPPORTED
 };
 
 struct node_t {
