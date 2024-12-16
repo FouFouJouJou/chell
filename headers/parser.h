@@ -1,6 +1,5 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
-#include <tree.h>
 
 enum node_type_t {
    NODE_PIPE
