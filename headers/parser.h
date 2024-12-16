@@ -1,11 +1,6 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
-
-enum node_type_t {
-  PIPE_NODE
-  ,AND_NODE
-  ,COMMAND_NODE
-};
+#include <tree.h>
 
 enum option_type_t {
   OPTION_VARIABLE
@@ -22,17 +17,10 @@ struct option_t {
   struct node_t *node;
 };
 
-struct command_t {
+struct cmd_t {
   char *executable;
   char **argv;
   int argc;
-};
-
-struct node_t {
-  void *data;
-  enum node_type_t type;
-  struct node_t *right;
-  struct node_t *left;
 };
 
 void printf_tree(struct node_t *head, int level);

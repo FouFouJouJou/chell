@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <assert.h>
+#include <tree.h>
 #include <lexer.h>
 #include <parser.h>
 #define ASSERT_T(x, t) assert((x)->type == t)
 
-void printf_cmd_node(struct command_t cmd) {
+void printf_cmd_node(struct cmd_t cmd) {
   printf("CMD: (%s, %d, [", cmd.executable, cmd.argc);
   for(int i=0; i<cmd.argc; ++i) {
     printf("%s", cmd.argv[i]);
@@ -19,9 +20,9 @@ void printf_tree(struct node_t *head, int level) {
 }
 
 size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
-  struct command_t *cmd=calloc(1, sizeof(struct command_t));
+  struct cmd_t *cmd=calloc(1, sizeof(struct cmd_t));
   cmd->argc=0;
-  node->type=COMMAND_NODE;
+  node->type=NODE_CMD;
   node->data=cmd;
   struct token_t *token=tokens;
   ASSERT_T(token, TOKEN_STRING);
@@ -46,7 +47,7 @@ struct node_t *build_tree(struct token_t *tokens) {
   while(token->type != TOKEN_EOC) {
     if(token->type == TOKEN_STRING) {
       size_t read=parse_cmd(token, head);
-      printf_cmd_node(*((struct command_t*)head->data));
+      printf_cmd_node(*((struct cmd_t*)head->data));
       token+=read;
     }
     if(token->type == TOKEN_PIPE) {
