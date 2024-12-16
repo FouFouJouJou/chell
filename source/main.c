@@ -1,12 +1,8 @@
 #include <stdio.h>
 #include <string.h>
-#include <lexer.h>
+#include <parser.h>
 
 int main(int argc, char **argv) {
-  struct token_t *tokens=lex(argv[1], strlen(argv[1])), *token=tokens;
-  while(token->type != TOKEN_EOC) {
-    printf_token(*token);
-    token++;
-  }
+  struct node_t *head=parse(argv[1], strlen(argv[1]));
   return 0;
 }
