@@ -114,15 +114,14 @@ struct node_t *build_tree(struct token_t *tokens) {
       token+=read;
     }
 
-    // TODO: refactor the mess below
     if(token->type == TOKEN_PIPE) {
       token++;
       struct node_t *right_cmd=calloc(1, sizeof(struct node_t));
       size_t read=parse_cmd(token, right_cmd);
       struct node_t *left_cmd=stack[stack_idx-1];
+      stack_idx--;
       struct node_t *pipe_node=create_delim_node(left_cmd, right_cmd, NODE_PIPE);
-      push_head(pipe_node, &head);
-      stack[stack_idx]=pipe_node;
+      stack[stack_idx++]=pipe_node;
       token+=read;
     }
 
@@ -131,9 +130,9 @@ struct node_t *build_tree(struct token_t *tokens) {
       struct node_t *right_cmd=calloc(1, sizeof(struct node_t));
       size_t read=parse_cmd(token, right_cmd);
       struct node_t *left_cmd=stack[stack_idx-1];
+      stack_idx--;
       struct node_t *and_node=create_delim_node(left_cmd, right_cmd, NODE_AND);
-      push_head(and_node, &head);
-      stack[stack_idx]=and_node;
+      stack[stack_idx++]=and_node;
       token+=read;
     }
 
@@ -142,16 +141,14 @@ struct node_t *build_tree(struct token_t *tokens) {
       struct node_t *right_cmd=calloc(1, sizeof(struct node_t));
       size_t read=parse_cmd(token, right_cmd);
       struct node_t *left_cmd=stack[stack_idx-1];
+      stack_idx--;
       struct node_t *semi_colon_node=create_delim_node(left_cmd, right_cmd, NODE_SEMI_COLON);
-      push_head(semi_colon_node, &head);
-      stack[stack_idx]=semi_colon_node;
+      stack[stack_idx++]=semi_colon_node;
       token+=read;
     }
   }
-  return head;
-}
-
-void run(struct node_t *head) {
+  assert(stack_idx == 1);
+  return stack[stack_idx-1];
 }
 
 struct node_t *parse(char *line, size_t len) {
