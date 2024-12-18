@@ -5,55 +5,51 @@
 #include <exec.h>
 #include <sys/wait.h>
 
-void run(struct node_t *node) {
+int run(struct node_t *node, int ifd, int ofd) {
   switch(node->type) {
     case NODE_PIPE: {
       int p[2];
       if(pipe(p) == -1) exit(71);
-      int status_left, status_right;
-      pid_t left_process=fork();
-      if(left_process == 0) {
-        if(dup2(p[1], STDOUT_FILENO) == -1) exit(71);
-        run(node->left);
-        return;
+      
+      if(ifd != STDIN_FILENO) {
+        if(dup2(ifd, STDIN_FILENO) == -1) exit(69);
+        close(ifd);
+      }
+      if(ofd != STDOUT_FILENO) {
+        if(dup2(ofd, STDOUT_FILENO) == -1) exit(69);
+        close(ofd);
       }
 
-
-      pid_t right_process=fork();
-      if(right_process == 0) {
-        if(dup2(p[0], STDIN_FILENO) == -1) exit(71);
-        run(node->right);
-        return;
-      }
-      waitpid(left_process, &status_left, 1);
-      waitpid(right_process, &status_right, 1);
-      break;
-    }
-    case NODE_AND:
-      break;
-    case NODE_SEMI_COLON: {
-      pid_t left_process=fork();
-      int status_left, status_right;
-      if(left_process == 0) {
-        run(node->left);
-        return;
-      }
-      waitpid(left_process, &status_left, 0);
-      pid_t right_process=fork();
-      if(right_process == 0) {
-        run(node->right);
-        return;
-      }
-      waitpid(right_process, &status_right, 0);
-      break;
+      int status1=run(node->left, STDIN_FILENO, p[1]);
+      close(p[1]);
+      int status2=run(node->right, p[0], STDOUT_FILENO);
+      close(p[0]);
+      exit(!status1 && !status2);
     }
 
-    case NODE_REDIR:
-      break;
     case NODE_CMD: {
-      struct cmd_t *cmd=(struct cmd_t *)node->data;
-      if(execvp(cmd->executable, cmd->argv) == -1) exit(72);
-      break;
+      pid_t process=fork();
+      int status;
+      if(process == 0) {
+        struct cmd_t *cmd=(struct cmd_t *)node->data;
+        if(ofd != STDOUT_FILENO) {
+          if(dup2(ofd, STDOUT_FILENO) == -1) exit(69);
+          close(ofd);
+        }
+        if(ifd != STDIN_FILENO) {
+          if(dup2(ifd, STDIN_FILENO) == -1) exit(69);
+          close(ifd);
+        }
+
+        if(execvp(cmd->executable, cmd->argv) == -1) {
+          printf("Nope\n");
+          exit(72);
+        }
+      }
+      wait(0);
+      if(WIFEXITED(status)) {
+        return(WEXITSTATUS(status));
+      }
     }
   }
 }

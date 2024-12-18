@@ -2,5 +2,5 @@
 #define __EXEC_H__
 #include <parser.h>
 
-void run(struct node_t *tree);
+int run(struct node_t *tree, int ifd, int ofd);
 #endif

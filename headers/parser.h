@@ -30,7 +30,6 @@ struct pipe_t {
 
 typedef void(*printf_node_func)(struct node_t node);
 void printf_node(struct node_t node);
-void run(struct node_t *head);
 struct node_t *parse(char *line, size_t len);
 
 void push_head(struct node_t *node, struct node_t **head);

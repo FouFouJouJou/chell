@@ -77,6 +77,7 @@ void printf_node(struct node_t node) {
 size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
   struct cmd_t *cmd=calloc(1, sizeof(struct cmd_t));
   cmd->argc=0;
+  cmd->argv=0;
   node->type=NODE_CMD;
   node->data=cmd;
   struct token_t *token=tokens;
@@ -89,10 +90,13 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
   ) {
     ASSERT_T(token, TOKEN_STRING);
     cmd->argc++;
-    cmd->argv=realloc(cmd->argv, (cmd->argc-1)*sizeof(char*));
+    cmd->argv=realloc(cmd->argv, (cmd->argc)*sizeof(char*));
     cmd->argv[cmd->argc-1]=token->literal;
     token++;
   }
+  cmd->argc++;
+  cmd->argv=realloc(cmd->argv, (cmd->argc)*sizeof(char*));
+  cmd->argv[cmd->argc-1]=0;
   return token-tokens;
 }
 
