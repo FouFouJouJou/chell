@@ -5,17 +5,29 @@
 #include <exec.h>
 #include <sys/wait.h>
 
-int run(struct node_t *node, int ifd, int ofd) {
+int run(struct node_t *node) {
   switch(node->type) {
     case NODE_PIPE: {
-      int p[2];
+      int p[2], status;
       if(pipe(p) == -1) exit(71);
-      
-      int status1=run(node->left, STDIN_FILENO, p[1]);
-      close(p[1]);
-      int status2=run(node->right, p[0], STDOUT_FILENO);
-      close(p[0]);
-      exit(!status1 && !status2);
+      pid_t left=fork();
+      if(left == 0) {
+        dup2(p[1], STDOUT_FILENO);
+        close(p[0]);
+        close(p[1]);
+        exit(run(node->left));
+      }
+      pid_t right=fork();
+      if(right == 0) {
+        dup2(p[0], STDIN_FILENO);
+        close(p[0]);
+        close(p[1]);
+        exit(run(node->right));
+      }
+      waitpid(right, 0, 1);
+      waitpid(left, 0, 1);
+      wait(0);
+      exit(0);
     }
 
     case NODE_CMD: {
@@ -23,15 +35,6 @@ int run(struct node_t *node, int ifd, int ofd) {
       int status;
       if(process == 0) {
         struct cmd_t *cmd=(struct cmd_t *)node->data;
-        if(ofd != STDOUT_FILENO) {
-          if(dup2(ofd, STDOUT_FILENO) == -1) exit(69);
-          close(ofd);
-        }
-        if(ifd != STDIN_FILENO) {
-          if(dup2(ifd, STDIN_FILENO) == -1) exit(69);
-          close(ifd);
-        }
-
         if(execvp(cmd->executable, cmd->argv) == -1) {
           printf("Nope\n");
           exit(72);
