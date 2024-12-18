@@ -11,15 +11,6 @@ int run(struct node_t *node, int ifd, int ofd) {
       int p[2];
       if(pipe(p) == -1) exit(71);
       
-      if(ifd != STDIN_FILENO) {
-        if(dup2(ifd, STDIN_FILENO) == -1) exit(69);
-        close(ifd);
-      }
-      if(ofd != STDOUT_FILENO) {
-        if(dup2(ofd, STDOUT_FILENO) == -1) exit(69);
-        close(ofd);
-      }
-
       int status1=run(node->left, STDIN_FILENO, p[1]);
       close(p[1]);
       int status2=run(node->right, p[0], STDOUT_FILENO);
