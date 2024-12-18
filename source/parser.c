@@ -104,13 +104,12 @@ struct node_t *build_tree(struct token_t *tokens) {
   struct node_t *head=0;
   struct token_t *token=tokens;
   int stack_idx=0;
-  struct node_t *stack[20];
+  struct node_t *stack[MAX_STACK_CAPACITY];
   while(token->type != TOKEN_EOC) {
     if(token->type == TOKEN_STRING) {
       struct node_t *node=calloc(1, sizeof(struct node_t));
       size_t read=parse_cmd(token, node);
       stack[stack_idx++]=node;
-      assert(stack_idx==1);
       token+=read;
     }
 
@@ -146,6 +145,7 @@ struct node_t *build_tree(struct token_t *tokens) {
       stack[stack_idx++]=semi_colon_node;
       token+=read;
     }
+    assert(stack_idx==1);
   }
   assert(stack_idx == 1);
   return stack[stack_idx-1];

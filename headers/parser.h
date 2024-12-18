@@ -1,5 +1,6 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
+#define MAX_STACK_CAPACITY 20
 
 enum node_type_t {
    NODE_PIPE
