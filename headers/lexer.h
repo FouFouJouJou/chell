@@ -22,4 +22,5 @@ struct token_t {
 
 void printf_token(struct token_t token);
 struct token_t *lex(char *cmd, size_t len);
+void free_tokens(struct token_t *tokens);
 #endif

@@ -96,6 +96,14 @@ size_t lex_delimiter(char *cmd, struct token_t *token) {
   return 0;
 }
 
+void free_tokens(struct token_t *tokens) {
+  struct token_t *token=tokens;
+  while(token->type != TOKEN_EOC) {
+    free(token); 
+    token++;
+  }
+}
+
 struct token_t *lex(char *cmd, size_t len) {
   printf("%s(%d)\n", cmd, len);
   struct token_t *tokens=0;
