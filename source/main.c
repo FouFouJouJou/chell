@@ -9,6 +9,7 @@
 int main(int argc, char **argv) {
   struct node_t *head=parse(argv[1], strlen(argv[1]));
   printf_tree(head, 0, printf_node);
-  run(head);
-  return 0;
+  int exit_code=run(head);
+  printf("exit code: %d\n", exit_code);
+  return exit_code;
 }

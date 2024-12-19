@@ -6,28 +6,12 @@
 #include <parser.h>
 #define ASSERT_T(x, t) assert((x)->type == t)
 
-struct node_t *create_cmd_node(struct cmd_t *cmd) {
-  struct node_t *node = calloc(1, sizeof(struct node_t));
-  node->type = NODE_CMD;
-  node->data=cmd;
-  return node;
-}
-
 struct node_t *create_delim_node(struct node_t *left, struct node_t *right, enum node_type_t type) {
   struct node_t *node=calloc(1, sizeof(struct node_t));
   node->type=type;
   node->right=right;
   node->left=left;
   return node;
-}
-
-void push_head(struct node_t *node, struct node_t **head) {
-  if(*head == 0) {
-    *head=node;
-    return;
-  }
-  node->left=*head;
-  *head=node;
 }
 
 void printf_tree(struct node_t *node, int level, printf_node_func printf_func) {
@@ -98,10 +82,6 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
   cmd->argv=realloc(cmd->argv, (cmd->argc)*sizeof(char*));
   cmd->argv[cmd->argc-1]=0;
   return token-tokens;
-}
-
-size_t parse_pipe(struct token_t *tokens, struct node_t *node) {
-  return 0;
 }
 
 struct node_t *build_tree(struct token_t *tokens) {

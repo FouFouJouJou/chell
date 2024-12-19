@@ -31,12 +31,12 @@ int run(struct node_t *node) {
       }
       close(p[0]);
       close(p[1]);
-      if(waitpid(left_process, &left_status, 1) == -1) exit(70);
+      if(waitpid(left_process, &left_status, WUNTRACED) == -1) exit(70);
       if(WIFEXITED(left_status)) {
         int status_code=WEXITSTATUS(left_status);
         if(status_code) exit(status_code);
       }
-      if(waitpid(right_process, &right_status, 1) == -1) exit(70);
+      if(waitpid(right_process, &right_status, WUNTRACED) == -1) exit(70);
       if(WIFEXITED(right_status)) {
         int status_code=WEXITSTATUS(right_status);
         if(status_code) exit(status_code);
@@ -46,7 +46,6 @@ int run(struct node_t *node) {
 
     case NODE_CMD: {
       pid_t process=fork();
-      int status;
       if(process == 0) {
         struct cmd_t *cmd=(struct cmd_t *)node->data;
         if(execvp(cmd->executable, cmd->argv) == -1) {
@@ -54,7 +53,8 @@ int run(struct node_t *node) {
           exit(72);
         }
       }
-      waitpid(process, &status, 1);
+      int status=0;
+      waitpid(process, &status, WUNTRACED);
       if(WIFEXITED(status)) {
         return(WEXITSTATUS(status));
       }

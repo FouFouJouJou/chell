@@ -32,14 +32,6 @@ void printf_token(struct token_t token) {
   printf("TKN: (literal=%s, type=%s, len=%ld)\n", token.literal, token_type_to_string(token.type), token.len);
 }
 
-struct token_t make_token(char *literal, size_t len, enum token_type_t type) {
-  return (struct token_t){
-    .literal=literal
-      , .len=len
-      , .type=type
-  };
-}
-
 size_t lex_string(char *cmd, struct token_t *token) {
   // TODO: double or single quote case
   char delimiters[]=" &><|;";  
