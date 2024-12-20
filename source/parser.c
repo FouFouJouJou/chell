@@ -72,11 +72,12 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
     && token->type != TOKEN_AND 
     && token->type != TOKEN_SEMI_COLON
   ) {
-    ASSERT_T(token, TOKEN_STRING);
-    cmd->argc++;
-    cmd->argv=realloc(cmd->argv, (cmd->argc)*sizeof(char*));
-    cmd->argv[cmd->argc-1]=token->literal;
-    token++;
+    if(token->type == TOKEN_STRING) {
+      cmd->argc++;
+      cmd->argv=realloc(cmd->argv, (cmd->argc)*sizeof(char*));
+      cmd->argv[cmd->argc-1]=token->literal;
+      token++;
+    }
   }
   cmd->argc++;
   cmd->argv=realloc(cmd->argv, (cmd->argc)*sizeof(char*));

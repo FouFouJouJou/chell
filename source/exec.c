@@ -44,7 +44,7 @@ int run(struct node_t *node) {
       return 0;
     }
 
-    case NODE_SEMI_COLON:
+    case NODE_SEMI_COLON: {
       int left_status, right_status;
       pid_t left_process=fork();
       if(left_process == 0) {
@@ -52,6 +52,28 @@ int run(struct node_t *node) {
         exit(status);
       }
       waitpid(left_process, &left_status, WUNTRACED);
+
+      pid_t right_process=fork();
+      if(right_process == 0) {
+        int status=run(node->right);
+        exit(status);
+      }
+      waitpid(right_process, &right_status, WUNTRACED);
+      if(WIFEXITED(right_status)) {
+        return WEXITSTATUS(right_status);
+      }
+      break;
+    }
+
+    case NODE_AND:
+      int left_status, right_status;
+      pid_t left_process=fork();
+      if(left_process == 0) {
+        int status=run(node->left);
+        exit(status);
+      }
+      waitpid(left_process, &left_status, WUNTRACED);
+      if(WIFEXITED(left_status) && WEXITSTATUS(left_status) != EXIT_SUCCESS) return WEXITSTATUS(left_status); 
 
       pid_t right_process=fork();
       if(right_process == 0) {
