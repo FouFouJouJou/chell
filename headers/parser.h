@@ -1,6 +1,7 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
 #define MAX_STACK_CAPACITY 20
+#include <lexer.h>
 
 enum node_type_t {
    NODE_PIPE
@@ -25,14 +26,14 @@ struct cmd_t {
 };
 
 struct redir_t {
-  char *input_file, *output_file, *error_file;
+  char input_file[100], output_file[100], error_file[100];
+  struct node_t *cmd;
 };
 
 typedef void(*printf_node_func)(struct node_t node);
 void printf_node(struct node_t node);
-struct node_t *parse(char *line, size_t len);
-
-void push_head(struct node_t *node, struct node_t **head);
+struct node_t *parse(struct token_t *tokens);
 void printf_tree(struct node_t *node, int level, printf_node_func printf_func);
+void free_tree(struct node_t *head);
 
 #endif

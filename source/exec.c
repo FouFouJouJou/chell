@@ -94,7 +94,7 @@ int run(struct node_t *node) {
         printf("%d\n", fd);
         if(dup2(fd, STDOUT_FILENO) == -1) exit(72);
         close(fd);
-        exit(run(node->left));
+        exit(run(redir->cmd));
       }
       int status;
       if(waitpid(process, &status, WUNTRACED) == -1) exit(70);

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stddef.h>
 #include <assert.h>
 #include <lexer.h>
@@ -81,11 +82,11 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
       cmd->argv[cmd->argc-1]=token->literal;
       token++;
     }
-    else if(token->type == TOKEN_OUT_TRUNC_REDIR) {
+    if(token->type == TOKEN_OUT_TRUNC_REDIR) {
       token++;
       ASSERT_T(token, TOKEN_STRING);
       redir=calloc(1, sizeof(struct redir_t));
-      redir->output_file=token->literal;
+      strncpy(redir->output_file, token->literal, strlen(token->literal));
       token++;
     }
   }
@@ -95,14 +96,14 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
   cmd->argv[cmd->argc-1]=0;
 
   if(redir != 0) {
-    node->type=NODE_OUT_TRUNC_REDIR;
-    node->data=redir;
-    struct node_t *cmd_node=calloc(1, sizeof(struct node_t *));
+    struct node_t *cmd_node=calloc(1, sizeof(struct node_t));
     cmd_node->data=cmd;
     cmd_node->type=NODE_CMD;
     cmd_node->right=cmd_node->left=0;
-    node->left=cmd_node;
-    node->right=0;
+    node->type=NODE_OUT_TRUNC_REDIR;
+    node->data=redir;
+    redir->cmd=cmd_node;
+    node->right=node->left=0;
   } else {
     node->type=NODE_CMD;
     node->data=cmd;
@@ -112,10 +113,9 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
 }
 
 struct node_t *build_tree(struct token_t *tokens) {
-  struct node_t *head=0;
   struct token_t *token=tokens;
   int stack_idx=0;
-  struct node_t *stack[MAX_STACK_CAPACITY];
+  struct node_t *stack[MAX_STACK_CAPACITY]={0};
   while(token->type != TOKEN_EOC) {
     if(token->type == TOKEN_STRING) {
       struct node_t *node=calloc(1, sizeof(struct node_t));
@@ -124,7 +124,7 @@ struct node_t *build_tree(struct token_t *tokens) {
       token+=read;
     }
 
-    if(token->type == TOKEN_PIPE) {
+    else if(token->type == TOKEN_PIPE) {
       token++;
       struct node_t *right_cmd=calloc(1, sizeof(struct node_t));
       size_t read=parse_cmd(token, right_cmd);
@@ -135,7 +135,7 @@ struct node_t *build_tree(struct token_t *tokens) {
       token+=read;
     }
 
-    if(token->type == TOKEN_AND) {
+    else if(token->type == TOKEN_AND) {
       token++;
       struct node_t *right_cmd=calloc(1, sizeof(struct node_t));
       size_t read=parse_cmd(token, right_cmd);
@@ -146,7 +146,7 @@ struct node_t *build_tree(struct token_t *tokens) {
       token+=read;
     }
 
-    if(token->type == TOKEN_SEMI_COLON) {
+    else if(token->type == TOKEN_SEMI_COLON) {
       token++;
       struct node_t *right_cmd=calloc(1, sizeof(struct node_t));
       size_t read=parse_cmd(token, right_cmd);
@@ -156,15 +156,18 @@ struct node_t *build_tree(struct token_t *tokens) {
       stack[stack_idx++]=semi_colon_node;
       token+=read;
     }
-    assert(stack_idx==1);
   }
   assert(stack_idx == 1);
-  return stack[stack_idx-1];
+  return stack[0];
+}
+void free_tree(struct node_t *head) {
+  if(head == 0) return;
+  free_tree(head->left);
+  free_tree(head->right);
+  free(head->data);
+  free(head);
 }
 
-struct node_t *parse(char *line, size_t len) {
-  struct token_t *tokens=lex(line, len);
-  struct node_t *head=build_tree(tokens);
-  //free_tokens(tokens);
-  return head;
+struct node_t *parse(struct token_t *tokens) {
+  return build_tree(tokens);
 }
