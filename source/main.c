@@ -19,14 +19,10 @@ int main(int argc, char **argv) {
       input=0;
       exit(0);
     }
-    input[read-1]='\0';
+    //input[read-1]='\0';
     if(!strncmp(input, "exit", 4)) exit(0);
-    struct token_t *tokens=lex(input, read-1);
-    struct node_t *head=parse(tokens);
-    int exit_code=run(head);
+    int exit_code=run_cmd(input, read);
     printf("exit code: %d\n", exit_code);
-    free(tokens);
-    free_tree(head);
     free(input);
   }
   return EXIT_SUCCESS;

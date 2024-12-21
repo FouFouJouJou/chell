@@ -3,8 +3,18 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/wait.h>
+#include <lexer.h>
 #include <parser.h>
 #include <exec.h>
+
+int run_cmd(char *cmd, size_t len) {
+  struct token_t *tokens=lex(cmd, len);
+  struct node_t *head=parse(tokens);
+  int exit_code=run(head);
+  free(tokens);
+  free_tree(head);
+  return exit_code;
+}
 
 int run(struct node_t *node) {
   switch(node->type) {

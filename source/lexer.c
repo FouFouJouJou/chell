@@ -34,7 +34,7 @@ void printf_token(struct token_t token) {
 
 size_t lex_string(char *cmd, struct token_t *token) {
   // TODO: double or single quote case
-  char delimiters[]=" &><|;";  
+  char delimiters[]=" &><|;\n";  
   size_t len=strcspn(cmd, delimiters);
   token->literal=strndup(cmd, len);
   token->len=len;
@@ -103,7 +103,7 @@ struct token_t *lex(char *cmd, size_t len) {
   while(cmd_copy < cmd+len) {
     size_t read=0;
     struct token_t token={.type=TOKEN_UNSUPPORTED};
-    cmd_copy+=strspn(cmd_copy, " ");
+    cmd_copy+=strspn(cmd_copy, " \t\r\n");
     if(cmd_copy == cmd+len) break;
     if((read=lex_string(cmd_copy, &token)));
     else if((read=lex_output_redirection(cmd_copy, &token)));

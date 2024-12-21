@@ -86,7 +86,7 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
       token++;
       ASSERT_T(token, TOKEN_STRING);
       redir=calloc(1, sizeof(struct redir_t));
-      strncpy(redir->output_file, token->literal, strlen(token->literal));
+      redir->output_file=token->literal;
       token++;
     }
   }
@@ -143,12 +143,42 @@ struct node_t *build_tree(struct token_t *tokens) {
   }
   return stack[0];
 }
+
+void free_node(struct node_t *node) {
+  switch(node->type) {
+    case NODE_CMD: {
+      struct cmd_t *cmd=(struct cmd_t *)node->data;
+      free(cmd->executable);
+      // argc => 
+      // argv => {"ls", "-l", 0}
+      for(int i=1; i<cmd->argc-1; ++i) {
+        free(cmd->argv[i]);
+      }
+      free(cmd->argv);
+      free(cmd);
+      break;
+    }
+    case NODE_OUT_TRUNC_REDIR: {
+      struct redir_t *redir=(struct redir_t *)node->data;
+      if(redir->input_file)
+        free(redir->input_file);
+      if(redir->output_file)
+        free(redir->output_file);
+      if(redir->error_file)
+        free(redir->error_file);
+      free(redir);
+      free_node(redir->cmd);
+      break;
+    }
+  }
+  free(node);
+}
+
 void free_tree(struct node_t *head) {
   if(head == 0) return;
   free_tree(head->left);
   free_tree(head->right);
-  free(head->data);
-  free(head);
+  free_node(head);
 }
 
 struct node_t *parse(struct token_t *tokens) {
