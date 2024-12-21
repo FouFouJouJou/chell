@@ -117,47 +117,30 @@ struct node_t *build_tree(struct token_t *tokens) {
   int stack_idx=0;
   struct node_t *stack[MAX_STACK_CAPACITY]={0};
   while(token->type != TOKEN_EOC) {
-    if(token->type == TOKEN_STRING) {
-      struct node_t *node=calloc(1, sizeof(struct node_t));
-      size_t read=parse_cmd(token, node);
-      stack[stack_idx++]=node;
-      token+=read;
+    switch(token->type) {
+      case TOKEN_STRING: {
+        struct node_t *node=calloc(1, sizeof(struct node_t));
+        size_t read=parse_cmd(token, node);
+        stack[stack_idx++]=node;
+        token+=read;
+        break;
+      }
+      case TOKEN_PIPE:
+      case TOKEN_AND:
+      case TOKEN_SEMI_COLON: {
+        token++;
+        struct node_t *right_cmd=calloc(1, sizeof(struct node_t));
+        size_t read=parse_cmd(token, right_cmd);
+        struct node_t *left_cmd=stack[stack_idx-1];
+        stack_idx--;
+        struct node_t *node=create_delim_node(left_cmd, right_cmd, token->type);
+        stack[stack_idx++]=node;
+        token+=read;
+        break;
+      }
     }
-
-    else if(token->type == TOKEN_PIPE) {
-      token++;
-      struct node_t *right_cmd=calloc(1, sizeof(struct node_t));
-      size_t read=parse_cmd(token, right_cmd);
-      struct node_t *left_cmd=stack[stack_idx-1];
-      stack_idx--;
-      struct node_t *pipe_node=create_delim_node(left_cmd, right_cmd, NODE_PIPE);
-      stack[stack_idx++]=pipe_node;
-      token+=read;
-    }
-
-    else if(token->type == TOKEN_AND) {
-      token++;
-      struct node_t *right_cmd=calloc(1, sizeof(struct node_t));
-      size_t read=parse_cmd(token, right_cmd);
-      struct node_t *left_cmd=stack[stack_idx-1];
-      stack_idx--;
-      struct node_t *and_node=create_delim_node(left_cmd, right_cmd, NODE_AND);
-      stack[stack_idx++]=and_node;
-      token+=read;
-    }
-
-    else if(token->type == TOKEN_SEMI_COLON) {
-      token++;
-      struct node_t *right_cmd=calloc(1, sizeof(struct node_t));
-      size_t read=parse_cmd(token, right_cmd);
-      struct node_t *left_cmd=stack[stack_idx-1];
-      stack_idx--;
-      struct node_t *semi_colon_node=create_delim_node(left_cmd, right_cmd, NODE_SEMI_COLON);
-      stack[stack_idx++]=semi_colon_node;
-      token+=read;
-    }
+    assert(stack_idx == 1);
   }
-  assert(stack_idx == 1);
   return stack[0];
 }
 void free_tree(struct node_t *head) {
