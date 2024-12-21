@@ -19,7 +19,7 @@ void printf_tree(struct node_t *node, int level, printf_node_func printf_func) {
     return;
   }
   for(int i=0; i<level; ++i) printf("  ");
-  printf_func(*node);
+  printf_node(*node);
   printf_tree(node->left, level+1, printf_func);
   printf_tree(node->right, level+1, printf_func);
 }
@@ -34,6 +34,11 @@ void printf_cmd_node(struct node_t node) {
   printf("])\n");
 }
 
+void printf_out_trunc_redir_node(struct node_t node) {
+  struct redir_t *redir=(struct redir_t*)node.data;
+  printf("> %s\n", redir->output_file);
+}
+
 void printf_node(struct node_t node) {
   switch(node.type) {
     case NODE_PIPE:
@@ -45,12 +50,13 @@ void printf_node(struct node_t node) {
     case NODE_SEMI_COLON:
       printf(";\n");
       break;
-    case NODE_REDIR:
-      break;
     case NODE_CMD:
       printf_cmd_node(node);
       break;
     case NODE_UNSUPPORTED:
+      break;
+    case NODE_OUT_TRUNC_REDIR:
+      printf_out_trunc_redir_node(node);
       break;
     default:
       printf("nope\n");
@@ -60,10 +66,7 @@ void printf_node(struct node_t node) {
 
 size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
   struct cmd_t *cmd=calloc(1, sizeof(struct cmd_t));
-  cmd->argc=0;
-  cmd->argv=0;
-  node->type=NODE_CMD;
-  node->data=cmd;
+  struct redir_t *redir=0;
   struct token_t *token=tokens;
   ASSERT_T(token, TOKEN_STRING);
   cmd->executable=token->literal;
@@ -78,10 +81,33 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
       cmd->argv[cmd->argc-1]=token->literal;
       token++;
     }
+    else if(token->type == TOKEN_OUT_TRUNC_REDIR) {
+      token++;
+      ASSERT_T(token, TOKEN_STRING);
+      redir=calloc(1, sizeof(struct redir_t));
+      redir->output_file=token->literal;
+      token++;
+    }
   }
+
   cmd->argc++;
   cmd->argv=realloc(cmd->argv, (cmd->argc)*sizeof(char*));
   cmd->argv[cmd->argc-1]=0;
+
+  if(redir != 0) {
+    node->type=NODE_OUT_TRUNC_REDIR;
+    node->data=redir;
+    struct node_t *cmd_node=calloc(1, sizeof(struct node_t *));
+    cmd_node->data=cmd;
+    cmd_node->type=NODE_CMD;
+    cmd_node->right=cmd_node->left=0;
+    node->left=cmd_node;
+    node->right=0;
+  } else {
+    node->type=NODE_CMD;
+    node->data=cmd;
+    node->right=node->left=0;
+  }
   return token-tokens;
 }
 

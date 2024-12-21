@@ -6,8 +6,8 @@ enum node_type_t {
    NODE_PIPE
   ,NODE_AND
   ,NODE_SEMI_COLON
-  ,NODE_REDIR
   ,NODE_CMD
+  ,NODE_OUT_TRUNC_REDIR
   ,NODE_UNSUPPORTED
 };
 
@@ -24,8 +24,8 @@ struct cmd_t {
   int argc;
 };
 
-struct pipe_t {
-  int pipe[2];
+struct redir_t {
+  char *input_file, *output_file, *error_file;
 };
 
 typedef void(*printf_node_func)(struct node_t node);

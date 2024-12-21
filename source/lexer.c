@@ -112,7 +112,7 @@ struct token_t *lex(char *cmd, size_t len) {
   while(cmd_copy < cmd+len) {
     size_t read=0;
     struct token_t token={.type=TOKEN_UNSUPPORTED};
-    cmd_copy+=strspn(cmd_copy, " ");
+    cmd_copy+=strspn(cmd_copy, " \n");
     if((read=lex_string(cmd_copy, &token)));
     else if((read=lex_output_redirection(cmd_copy, &token)));
     else if((read=lex_input_redirection(cmd_copy, &token)));
