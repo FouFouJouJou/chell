@@ -99,9 +99,10 @@ size_t lex_delimiter(char *cmd, struct token_t *token) {
 void free_tokens(struct token_t *tokens) {
   struct token_t *token=tokens;
   while(token->type != TOKEN_EOC) {
-    free(token); 
     token++;
+    free(token-1);
   }
+  free(token);
 }
 
 struct token_t *lex(char *cmd, size_t len) {

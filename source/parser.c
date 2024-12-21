@@ -165,5 +165,6 @@ struct node_t *build_tree(struct token_t *tokens) {
 struct node_t *parse(char *line, size_t len) {
   struct token_t *tokens=lex(line, len);
   struct node_t *head=build_tree(tokens);
+  //free_tokens(tokens);
   return head;
 }

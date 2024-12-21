@@ -21,9 +21,8 @@ int main(int argc, char **argv) {
     input[read-1]='\0';
     if(!strncmp(input, "exit", 4)) exit(0);
     struct node_t *head=parse(input, read-1);
-    printf_tree(head, 0, printf_node);
-    //int exit_code=run(head);
-    //printf("exit code: %d\n", exit_code);
+    int exit_code=run(head);
+    printf("exit code: %d\n", exit_code);
   }
   return EXIT_SUCCESS;
 }
