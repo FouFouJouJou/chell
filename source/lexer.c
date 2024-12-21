@@ -96,24 +96,15 @@ size_t lex_delimiter(char *cmd, struct token_t *token) {
   return 0;
 }
 
-void free_tokens(struct token_t *tokens) {
-  struct token_t *token=tokens;
-  while(token->type != TOKEN_EOC) {
-    token++;
-    free(token-1);
-  }
-  free(token);
-}
-
 struct token_t *lex(char *cmd, size_t len) {
-  printf("%s(%d)\n", cmd, len);
   struct token_t *tokens=0;
   size_t idx=0;
   char *cmd_copy=cmd;
   while(cmd_copy < cmd+len) {
     size_t read=0;
     struct token_t token={.type=TOKEN_UNSUPPORTED};
-    cmd_copy+=strspn(cmd_copy, " \n");
+    cmd_copy+=strspn(cmd_copy, " ");
+    if(cmd_copy == cmd+len) break;
     if((read=lex_string(cmd_copy, &token)));
     else if((read=lex_output_redirection(cmd_copy, &token)));
     else if((read=lex_input_redirection(cmd_copy, &token)));
