@@ -149,8 +149,6 @@ void free_node(struct node_t *node) {
     case NODE_CMD: {
       struct cmd_t *cmd=(struct cmd_t *)node->data;
       free(cmd->executable);
-      // argc => 
-      // argv => {"ls", "-l", 0}
       for(int i=1; i<cmd->argc-1; ++i) {
         free(cmd->argv[i]);
       }
