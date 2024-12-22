@@ -1,14 +1,17 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
 #define MAX_STACK_CAPACITY 20
+#include <stdint.h>
 #include <lexer.h>
+// 00000000
 
 enum node_type_t {
-   NODE_PIPE
+  NODE_PIPE
   ,NODE_AND
   ,NODE_SEMI_COLON
   ,NODE_CMD
   ,NODE_OUT_TRUNC_REDIR
+  ,NODE_REDIR
   ,NODE_UNSUPPORTED
 };
 
@@ -27,8 +30,7 @@ struct cmd_t {
 
 struct redir_t {
   char *input_file, *output_file, *error_file;
-  // TODO: refactoring plan for redirection flags
-  // uint8_t input_mode, output_mode, error_mode;
+  uint8_t flags;
   struct node_t *cmd;
 };
 

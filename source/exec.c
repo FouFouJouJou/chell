@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 #include <sys/wait.h>
 #include <lexer.h>
 #include <parser.h>
@@ -96,14 +97,19 @@ int run(struct node_t *node) {
       }
       break;
     }
-    case NODE_OUT_TRUNC_REDIR: {
+    case NODE_REDIR: {
       pid_t process=fork();
       if(process == 0) {
         struct redir_t *redir=(struct redir_t*)node->data;
-        int fd=creat(redir->output_file, S_IWUSR|S_IRUSR);
-        printf("%d\n", fd);
-        if(dup2(fd, STDOUT_FILENO) == -1) exit(72);
-        close(fd);
+        if(redir->output_file != 0) {
+          int flags=O_WRONLY|(redir->flags & 0x01 ? O_APPEND : 0);
+          int fd=open(redir->output_file, O_CREAT|flags, S_IWUSR|S_IRUSR);
+          if((fd == -1) && (EEXIST == errno)) {
+            fd = open(redir->output_file, flags, S_IWUSR|S_IRUSR);
+          }
+          if(dup2(fd, STDOUT_FILENO) == -1) exit(72);
+          close(fd);
+        }
         exit(run(redir->cmd));
       }
       int status;

@@ -35,9 +35,10 @@ void printf_cmd_node(struct node_t node) {
   printf("])\n");
 }
 
-void printf_out_trunc_redir_node(struct node_t node) {
+void printf_redir_node(struct node_t node) {
   struct redir_t *redir=(struct redir_t*)node.data;
-  printf("> %s\n", redir->output_file);
+  char *symbol=redir->flags & 0x01 ? ">>" : ">";
+  printf("%d %s %s\n", redir->flags, symbol, redir->output_file);
 }
 
 void printf_node(struct node_t node) {
@@ -54,14 +55,13 @@ void printf_node(struct node_t node) {
     case NODE_CMD:
       printf_cmd_node(node);
       break;
+    case NODE_REDIR:
+      printf_redir_node(node);
+      break;
     case NODE_UNSUPPORTED:
-      break;
-    case NODE_OUT_TRUNC_REDIR:
-      printf_out_trunc_redir_node(node);
-      break;
+      exit(73);
     default:
-      printf("nope\n");
-      break;
+      exit(74);
   }
 }
 
@@ -76,18 +76,33 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
     && token->type != TOKEN_AND 
     && token->type != TOKEN_SEMI_COLON
   ) {
-    if(token->type == TOKEN_STRING) {
-      cmd->argc++;
-      cmd->argv=realloc(cmd->argv, (cmd->argc)*sizeof(char*));
-      cmd->argv[cmd->argc-1]=token->literal;
-      token++;
-    }
-    if(token->type == TOKEN_OUT_TRUNC_REDIR) {
-      token++;
-      ASSERT_T(token, TOKEN_STRING);
-      redir=calloc(1, sizeof(struct redir_t));
-      redir->output_file=token->literal;
-      token++;
+    switch(token->type) {
+      case TOKEN_STRING: {
+        cmd->argc++;
+        cmd->argv=realloc(cmd->argv, (cmd->argc)*sizeof(char*));
+        cmd->argv[cmd->argc-1]=token->literal;
+        token++;
+        break;
+      }
+      case TOKEN_OUT_TRUNC_REDIR:
+      case TOKEN_OUT_APPEND_REDIR: {
+        ASSERT_T(token+1, TOKEN_STRING);
+        if(redir==0) {
+          redir=calloc(1, sizeof(struct redir_t));
+          redir->flags=0;
+        }
+        if(token->type == TOKEN_OUT_APPEND_REDIR) {
+          redir->flags|=0x01;
+        }
+        else {
+          redir->flags|=0x00;
+        }
+
+        token++;
+        redir->output_file=token->literal;
+        token++;
+        break;
+      }
     }
   }
 
@@ -100,9 +115,9 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
     cmd_node->data=cmd;
     cmd_node->type=NODE_CMD;
     cmd_node->right=cmd_node->left=0;
-    node->type=NODE_OUT_TRUNC_REDIR;
-    node->data=redir;
     redir->cmd=cmd_node;
+    node->type=NODE_REDIR;
+    node->data=redir;
     node->right=node->left=0;
   } else {
     node->type=NODE_CMD;
