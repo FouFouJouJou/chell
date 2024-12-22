@@ -84,6 +84,26 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
         token++;
         break;
       }
+      case TOKEN_IN_FILE_REDIR:
+      case TOKEN_IN_DOUBLE_REDIR: {
+        ASSERT_T(token+1, TOKEN_STRING);
+        if(redir==0) {
+          redir=calloc(1, sizeof(struct redir_t));
+          redir->flags=0;
+        }
+        if(token->type == TOKEN_IN_DOUBLE_REDIR) {
+          redir->flags|=0x10;
+        }
+        else {
+          redir->flags|=0x00;
+        }
+
+        token++;
+        redir->input_file=token->literal;
+        token++;
+        break;
+      }
+
       case TOKEN_OUT_TRUNC_REDIR:
       case TOKEN_OUT_APPEND_REDIR: {
         ASSERT_T(token+1, TOKEN_STRING);

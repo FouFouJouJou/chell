@@ -110,6 +110,12 @@ int run(struct node_t *node) {
           if(dup2(fd, STDOUT_FILENO) == -1) exit(72);
           close(fd);
         }
+        if(redir->input_file != 0) {
+          int fd=open(redir->input_file, O_RDONLY, S_IWUSR|S_IRUSR);
+          if(fd == -1) exit(80);
+          if(dup2(fd, STDIN_FILENO) == -1) exit(72);
+          close(fd);
+        }
         exit(run(redir->cmd));
       }
       int status;
