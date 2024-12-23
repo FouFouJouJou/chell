@@ -1,0 +1,28 @@
+#+TITLE: Unix shell
+** Resouces
+- [[https://en.wikipedia.org/wiki/Pipeline_(Unix)][Unix pipes internals]]
+- [[https://tldp.org/LDP/abs/html/here-docs.html][Here documents]]
+
+* TODO Functionality [0/3]
+  - [] lexing
+    - [X] string literals
+    - [X] I/O redirections
+    - [] error redirection
+    - [X] pipes
+    - [X] &&
+    - [X] ||
+    - [] backgound jobs
+  - [] parsing and exec
+    - [X] commands
+    - [X] pipes
+    - [X] &&
+    - [X] ||
+    - [X] I/O redirection
+    - [] error redirection
+    - [] background jobs
+  - [] extra features
+    - [] autocompletion
+    - [] environment variables
+    - [] process substitution
+    - [] command arguments
+    - [] config file
