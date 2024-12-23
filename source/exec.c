@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -11,9 +12,10 @@
 int run_cmd(char *cmd, size_t len) {
   struct token_t *tokens=lex(cmd, len);
   struct node_t *head=parse(tokens);
+  printf_tree(head, 0, printf_node);
   int exit_code=run(head);
-  free(tokens);
   free_tree(head);
+  free(tokens);
   return exit_code;
 }
 
@@ -98,9 +100,9 @@ int run(struct node_t *node) {
       break;
     }
     case NODE_REDIR: {
+      struct redir_t *redir=(struct redir_t*)node->data;
       pid_t process=fork();
       if(process == 0) {
-        struct redir_t *redir=(struct redir_t*)node->data;
         if(redir->output_file != 0) {
           int flags=O_WRONLY|(redir->flags & 0x01 ? O_APPEND : 0);
           int fd=open(redir->output_file, O_CREAT|flags, S_IWUSR|S_IRUSR);
@@ -116,10 +118,37 @@ int run(struct node_t *node) {
           if(dup2(fd, STDIN_FILENO) == -1) exit(72);
           close(fd);
         }
+        else if(redir->here_tag != 0) {
+          char *input=0, *prev_input=0;
+          size_t size, read, prev_read;
+          while(1) {
+            printf("> ");
+            read=getline(&input, &size, stdin);
+            if(!strncmp(input, redir->here_tag, strlen(redir->here_tag))) {
+              free(input);
+              input=0;
+              break;
+            }
+            if(prev_input) free(prev_input);
+            prev_input=input;
+            prev_read=read;
+            input=0;
+          }
+          // NOTE: not using tmp file because of bad wsl support (O_TMPFILE creation flag)
+          int fd=open(".tmp", O_CREAT | O_RDWR, S_IWUSR|S_IRUSR);
+          write(fd, prev_input, strlen(prev_input));
+          close(fd);
+          fd=open(".tmp", O_RDONLY);
+          if(dup2(fd, STDIN_FILENO) == -1) exit(69);
+          if(close(fd) == -1) exit(69);
+        }
         exit(run(redir->cmd));
       }
       int status;
       if(waitpid(process, &status, WUNTRACED) == -1) exit(70);
+      if(redir->here_tag) {
+        unlink(".tmp");
+      }
       if(WIFEXITED(status)) {
         return WEXITSTATUS(status);
       }

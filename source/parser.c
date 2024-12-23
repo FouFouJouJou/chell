@@ -37,8 +37,15 @@ void printf_cmd_node(struct node_t node) {
 
 void printf_redir_node(struct node_t node) {
   struct redir_t *redir=(struct redir_t*)node.data;
-  char *symbol=redir->flags & 0x01 ? ">>" : ">";
-  printf("%d %s %s\n", redir->flags, symbol, redir->output_file);
+  if(redir->output_file) {
+    char *out_symbol=redir->flags & 0x01 ? ">>" : ">";
+    printf("%d %s %s\n", redir->flags & 0x01, out_symbol, redir->output_file);
+  }
+
+  if(redir->here_tag) {
+    char *in_symbol=((redir->flags & 0x10)>>4) ? "<<" : "<";
+    printf("%d %s %s\n", (redir->flags & 0x10)>>4, in_symbol, redir->here_tag);
+  }
 }
 
 void printf_node(struct node_t node) {
@@ -92,14 +99,15 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
           redir->flags=0;
         }
         if(token->type == TOKEN_IN_DOUBLE_REDIR) {
+          token++;
+          redir->here_tag=token->literal;
           redir->flags|=0x10;
         }
         else {
+          token++;
+          redir->input_file=token->literal;
           redir->flags|=0x00;
         }
-
-        token++;
-        redir->input_file=token->literal;
         token++;
         break;
       }

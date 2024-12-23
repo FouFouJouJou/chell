@@ -2,10 +2,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <lexer.h>
-#include <parser.h>
-#include <exec.h>
 #include <sys/wait.h>
+#include <exec.h>
 
 int main(int argc, char **argv) {
   while(1) {
