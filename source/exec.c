@@ -50,8 +50,7 @@ int run(struct node_t *node) {
         if(dup2(p[1], STDOUT_FILENO) == -1) exit(69);
         close(p[0]);
         close(p[1]);
-        int status=run(node->left);
-        exit(status);
+        exit(run(node->left));
       }
 
       pid_t right_process=fork();
@@ -59,8 +58,7 @@ int run(struct node_t *node) {
         if(dup2(p[0], STDIN_FILENO) == -1) exit(69);
         close(p[0]);
         close(p[1]);
-        int status=run(node->right);
-        exit(status);
+        exit(run(node->right));
       }
       close(p[0]);
       close(p[1]);
@@ -80,15 +78,13 @@ int run(struct node_t *node) {
       int left_status, right_status;
       pid_t left_process=fork();
       if(left_process == 0) {
-        int status=run(node->left);
-        exit(status);
+        exit(run(node->left));
       }
       if(waitpid(left_process, &left_status, WUNTRACED) == -1) exit(70);
 
       pid_t right_process=fork();
       if(right_process == 0) {
-        int status=run(node->right);
-        exit(status);
+        exit(run(node->right));
       }
       if(waitpid(right_process, &right_status, WUNTRACED) == -1) exit(70);
       if(WIFEXITED(right_status)) {
@@ -100,16 +96,14 @@ int run(struct node_t *node) {
       int left_status, right_status;
       pid_t left_process=fork();
       if(left_process == 0) {
-        int status=run(node->left);
-        exit(status);
+        exit(run(node->left));
       }
       if(waitpid(left_process, &left_status, WUNTRACED) == -1) exit(70);
       if(WIFEXITED(left_status) && WEXITSTATUS(left_status) != EXIT_SUCCESS) return WEXITSTATUS(left_status); 
 
       pid_t right_process=fork();
       if(right_process == 0) {
-        int status=run(node->right);
-        exit(status);
+        exit(run(node->right));
       }
       if(waitpid(right_process, &right_status, WUNTRACED) == -1) exit(70);
       if(WIFEXITED(right_status)) {
