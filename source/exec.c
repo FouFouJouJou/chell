@@ -9,6 +9,26 @@
 #include <parser.h>
 #include <exec.h>
 
+int get_here_document(char **buffer, char *tag) {
+  size_t size=0;
+  while(1) {
+    printf("> ");
+    char *line=0;
+    size_t line_size;
+    size_t read=getline(&line, &line_size, stdin);
+    if(!strncmp(line, tag, strlen(tag))) {
+      free(line);
+      line=0;
+      break;
+    }
+    size+=read;
+    *buffer=realloc(*buffer, sizeof(char)*(size+1));
+    strncpy(*buffer+size-read, line, read);
+    free(line);
+  }
+  return size;
+}
+
 int run_cmd(char *cmd, size_t len) {
   struct token_t *tokens=lex(cmd, len);
   struct node_t *head=parse(tokens);
@@ -56,7 +76,6 @@ int run(struct node_t *node) {
       }
       return 0;
     }
-
     case NODE_SEMI_COLON: {
       int left_status, right_status;
       pid_t left_process=fork();
@@ -77,7 +96,6 @@ int run(struct node_t *node) {
       }
       break;
     }
-
     case NODE_AND: {
       int left_status, right_status;
       pid_t left_process=fork();
@@ -119,24 +137,12 @@ int run(struct node_t *node) {
           close(fd);
         }
         else if(redir->here_tag != 0) {
-          char *input=0, *prev_input=0;
-          size_t size, read, prev_read;
-          while(1) {
-            printf("> ");
-            read=getline(&input, &size, stdin);
-            if(!strncmp(input, redir->here_tag, strlen(redir->here_tag))) {
-              free(input);
-              input=0;
-              break;
-            }
-            if(prev_input) free(prev_input);
-            prev_input=input;
-            prev_read=read;
-            input=0;
-          }
+          char *input=0;
+          size_t read=get_here_document(&input, redir->here_tag);
           // NOTE: not using tmp file because of bad wsl support (O_TMPFILE creation flag)
           int fd=open(".tmp", O_CREAT | O_RDWR, S_IWUSR|S_IRUSR);
-          write(fd, prev_input, strlen(prev_input));
+          write(fd, input, read);
+          free(input);
           close(fd);
           fd=open(".tmp", O_RDONLY);
           if(dup2(fd, STDIN_FILENO) == -1) exit(69);
@@ -154,7 +160,6 @@ int run(struct node_t *node) {
       }
       break;
     }
-
     case NODE_CMD: {
       pid_t process=fork();
       if(process == 0) {
