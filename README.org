@@ -4,9 +4,9 @@
 - [[https://tldp.org/LDP/abs/html/here-docs.html][Here documents]]
 
 * TODO Functionality [0/2]
-  - [ ] general features
+  - [ ] general features [6/7]
     - [X] string literals
-    - [4/4] I/O redirections
+    - [X] I/O redirections [4/4]
       - [X] >
       - [X] >>
       - [X] <
@@ -16,7 +16,7 @@
     - [X] &&
     - [X] ;
     - [X] ||
-  - [ ] extra features
+  - [ ] extra features [0/6]
     - [ ] jobs
     - [ ] autocompletion
     - [ ] environment variables
