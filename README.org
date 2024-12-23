@@ -21,5 +21,5 @@
     - [ ] autocompletion
     - [ ] environment variables
     - [ ] process substitution
-    - [ ] command arguments
+    - [ ] sub-command arguments
     - [ ] config file
