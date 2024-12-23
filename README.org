@@ -3,26 +3,23 @@
 - [[https://en.wikipedia.org/wiki/Pipeline_(Unix)][Unix pipes internals]]
 - [[https://tldp.org/LDP/abs/html/here-docs.html][Here documents]]
 
-* TODO Functionality [0/3]
-  - [] lexing
+* TODO Functionality [0/2]
+  - [ ] general features
     - [X] string literals
-    - [X] I/O redirections
-    - [] error redirection
+    - [4/4] I/O redirections
+      - [X] >
+      - [X] >>
+      - [X] <
+      - [X] <<
+    - [ ] error redirection
     - [X] pipes
     - [X] &&
+    - [X] ;
     - [X] ||
-    - [] backgound jobs
-  - [] parsing and exec
-    - [X] commands
-    - [X] pipes
-    - [X] &&
-    - [X] ||
-    - [X] I/O redirection
-    - [] error redirection
-    - [] background jobs
-  - [] extra features
-    - [] autocompletion
-    - [] environment variables
-    - [] process substitution
-    - [] command arguments
-    - [] config file
+  - [ ] extra features
+    - [ ] jobs
+    - [ ] autocompletion
+    - [ ] environment variables
+    - [ ] process substitution
+    - [ ] command arguments
+    - [ ] config file
