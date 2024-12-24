@@ -3,14 +3,12 @@
 #define MAX_STACK_CAPACITY 20
 #include <stdint.h>
 #include <lexer.h>
-// 00000000
 
 enum node_type_t {
   NODE_PIPE
   ,NODE_AND
   ,NODE_SEMI_COLON
   ,NODE_CMD
-  ,NODE_OUT_TRUNC_REDIR
   ,NODE_REDIR
   ,NODE_UNSUPPORTED
 };

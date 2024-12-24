@@ -4,7 +4,6 @@ set(SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/source)
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/headers)
 set(EXECUTABLE main) 
 add_executable(${EXECUTABLE})
-add_compile_options(${EXECUTABLE} PRIVATE -Wall -Wextra -Wpedantic)
 
 target_include_directories(${EXECUTABLE} PUBLIC ${INCLUDE_DIR})
 target_sources(${EXECUTABLE} PUBLIC 

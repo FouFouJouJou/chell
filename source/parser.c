@@ -199,7 +199,7 @@ void free_node(struct node_t *node) {
       free(cmd);
       break;
     }
-    case NODE_OUT_TRUNC_REDIR: {
+    case NODE_REDIR: {
       struct redir_t *redir=(struct redir_t *)node->data;
       if(redir->input_file)
         free(redir->input_file);
