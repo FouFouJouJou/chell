@@ -33,13 +33,23 @@ void printf_token(struct token_t token) {
 }
 
 size_t lex_string(char *cmd, struct token_t *token) {
-  // TODO: double or single quote case
-  char delimiters[]=" &><|;\n";  
-  size_t len=strcspn(cmd, delimiters);
-  token->literal=strndup(cmd, len);
-  token->len=len;
-  token->type=TOKEN_STRING;
-  return len;
+  if(*cmd == '\'' || *cmd == '"') {
+    char quotes=*cmd; 
+    size_t len=strcspn(cmd+1, &quotes);
+    token->literal=strndup(cmd+1, len);
+    token->len=len;
+    if(cmd[len+1] == *cmd) {
+      token->type=TOKEN_STRING;
+    }
+    return len+2;
+  } else {
+    char delimiters[]=" \"'&><|;\n";  
+    size_t len=strcspn(cmd, delimiters);
+    token->literal=strndup(cmd, len);
+    token->len=len;
+    token->type=TOKEN_STRING;
+    return len;
+  }
 }
 
 size_t lex_output_redirection(char *cmd, struct token_t *token) {
@@ -115,6 +125,7 @@ struct token_t *lex(char *cmd, size_t len) {
     idx++;
     tokens=realloc(tokens, idx*sizeof(struct token_t));
     tokens[idx-1]=token;
+    printf_token(token);
     cmd_copy+=read;
   }
   idx++;
