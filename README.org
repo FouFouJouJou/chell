@@ -17,6 +17,7 @@
     - [X] ;
     - [X] ||
   - [ ] extra features [0/6]
+    - [ ] builtins
     - [ ] jobs
     - [ ] autocompletion
     - [ ] environment variables
