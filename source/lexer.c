@@ -125,7 +125,6 @@ struct token_t *lex(char *cmd, size_t len) {
     idx++;
     tokens=realloc(tokens, idx*sizeof(struct token_t));
     tokens[idx-1]=token;
-    printf_token(token);
     cmd_copy+=read;
   }
   idx++;
