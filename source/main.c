@@ -17,7 +17,6 @@ int main(int argc, char **argv) {
       input=0;
       exit(0);
     }
-    if(!strncmp(input, "exit", 4)) exit(0);
     int exit_code=run_cmd(input, read);
     printf("exit code: %d\n", exit_code);
     free(input);
