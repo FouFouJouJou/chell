@@ -17,8 +17,12 @@
     - [X] ;
     - [X] ||
   - [ ] extra features [0/6]
-    - [ ] builtins
-    - [ ] history
+    - [ ] builtins [0/2]
+      - [ ] history
+      - [ ] cd
+    - [ ] history [1/2]
+      - [X] saving
+      - [ ] synching
     - [ ] jobs
     - [ ] autocompletion
     - [ ] environment variables
