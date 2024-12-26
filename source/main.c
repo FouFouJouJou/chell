@@ -7,7 +7,7 @@
 #include <history.h>
 
 int main(int argc, char **argv) {
-  read_from_fs(0);
+  read_history_from_fs(0);
   while(1) {
     printf("chell> ");
     char *input=0;
@@ -19,18 +19,9 @@ int main(int argc, char **argv) {
       input=0;
       exit(0);
     }
-    if(!strncmp(input, "exit", 4)) {
-      save_to_fs();
-      exit(0);
-    }
-
-    if(!strncmp(input, "history", 7)) {
-      log_history();
-      continue;
-    }
     int exit_code=run_cmd(input, read);
     printf("exit code: %d\n", exit_code);
-    save_to_buffer(input, read);
+    save_to_history_buffer(input, read);
   }
   return EXIT_SUCCESS;
 }

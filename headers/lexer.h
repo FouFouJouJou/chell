@@ -1,5 +1,6 @@
 #ifndef __LEXER_H__
 #define __LEXER_H__
+#include <stddef.h>
 
 enum token_type_t {
   TOKEN_STRING 

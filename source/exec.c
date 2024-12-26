@@ -8,6 +8,8 @@
 #include <lexer.h>
 #include <parser.h>
 #include <exec.h>
+#include <history.h>
+#include <builtin.h>
 
 int get_here_document(char **buffer, char *tag) {
   size_t size=0;
@@ -154,9 +156,12 @@ int run(struct node_t *node) {
       break;
     }
     case NODE_CMD: {
+      struct cmd_t *cmd=(struct cmd_t *)node->data;
+      if(is_builtin(cmd->executable))
+        return run_builtin(*cmd);
+
       pid_t process=fork();
       if(process == 0) {
-        struct cmd_t *cmd=(struct cmd_t *)node->data;
         if(execvp(cmd->executable, cmd->argv) == -1) {
           printf("Nope\n");
           exit(72);

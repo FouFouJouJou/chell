@@ -11,4 +11,5 @@ target_sources(${EXECUTABLE} PUBLIC
   ${SOURCE_DIRECTORY}/lexer.c 
   ${SOURCE_DIRECTORY}/parser.c 
   ${SOURCE_DIRECTORY}/exec.c
-  ${SOURCE_DIRECTORY}/history.c)
+  ${SOURCE_DIRECTORY}/history.c
+  ${SOURCE_DIRECTORY}/builtin.c)

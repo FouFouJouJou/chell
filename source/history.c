@@ -14,13 +14,13 @@ void log_history() {
   for(int i=0; i<idx; ++i) printf("  %d %s", i+1, history_buffer[i]);
 }
 
-void save_to_buffer(char *cmd, size_t len) {
+void save_to_history_buffer(char *cmd, size_t len) {
   if(idx == MAX_HISTORY_BUFFER_SIZE) {
     printf("[LOG] limit\n");
   }
   history_buffer[idx++]=cmd;
 }
-ssize_t read_from_fs(char *path) { 
+ssize_t read_history_from_fs(char *path) { 
   if(path == 0) path=HISTORY_PATH;
   int fd=open(path, O_RDONLY, S_IRUSR);
   if(fd == -1) {
@@ -37,7 +37,7 @@ ssize_t read_from_fs(char *path) {
   return 0;
 }
 
-ssize_t save_to_fs(char *path) {
+ssize_t save_history_to_fs(char *path) {
   if(path == 0) path=HISTORY_PATH;
   int fd=open(HISTORY_PATH, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR);
   if(fd == -1 && errno == EEXIST) {
