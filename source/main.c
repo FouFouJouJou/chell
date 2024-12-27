@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 #include <exec.h>
 #include <history.h>
+#include <builtin.h>
 
 int main(int argc, char **argv) {
   read_history_from_fs(0);

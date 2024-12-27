@@ -158,7 +158,7 @@ int run(struct node_t *node) {
     case NODE_CMD: {
       struct cmd_t *cmd=(struct cmd_t *)node->data;
       if(is_builtin(cmd->executable))
-        return run_builtin(*cmd);
+        return exec_builtin(*cmd);
 
       pid_t process=fork();
       if(process == 0) {
