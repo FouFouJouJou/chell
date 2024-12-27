@@ -3,6 +3,15 @@
 #define MAX_STACK_CAPACITY 20
 #include <stdint.h>
 #include <lexer.h>
+#define OP_EVAL 0x0
+#define OP_NOEVAL 0x1
+
+
+enum arg_type_t {
+  ARG_CMD
+  ,ARG_ENV_VAR
+  ,ARG_STRING
+};
 
 enum node_type_t {
   NODE_PIPE
@@ -18,6 +27,11 @@ struct node_t {
   enum node_type_t type;
   struct node_t *right;
   struct node_t *left;
+};
+
+struct arg_t {
+  void *data;
+  enum arg_type_t type;
 };
 
 struct cmd_t {

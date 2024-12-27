@@ -34,10 +34,12 @@ int get_here_document(char **buffer, char *tag) {
 int run_cmd(char *cmd, size_t len) {
   struct token_t *tokens=lex(cmd, len);
   struct node_t *head=parse(tokens);
-  int exit_code=run(head);
+  printf_tree(head, 0, printf_node);
+  //int exit_code=run(head);
   free_tree(head);
   free(tokens);
-  return exit_code;
+  return 0;
+  //return exit_code;
 }
 
 int run(struct node_t *node) {

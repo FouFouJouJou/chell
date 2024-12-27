@@ -72,11 +72,15 @@ void printf_node(struct node_t node) {
   }
 }
 
+size_t parse_quoted_string(struct token_t *tokens, char **result, uint8_t mode) {
+  return 0;
+}
+
 size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
   struct cmd_t *cmd=calloc(1, sizeof(struct cmd_t));
   struct redir_t *redir=0;
   struct token_t *token=tokens;
-  ASSERT_T(token, TOKEN_STRING);
+  assert(token->type == TOKEN_LITERAL);
   cmd->executable=token->literal;
   while(token->type != TOKEN_PIPE 
     && token->type != TOKEN_EOC 
@@ -84,7 +88,16 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
     && token->type != TOKEN_SEMI_COLON
   ) {
     switch(token->type) {
-      case TOKEN_STRING: {
+      case TOKEN_ENV_VAR: {
+        cmd->argc++;
+        cmd->argv=realloc(cmd->argv, (cmd->argc)*sizeof(char*));
+        char *env_var=getenv(token->literal);
+        cmd->argv[cmd->argc-1]=calloc(strlen(env_var)+1, sizeof(char));
+        strncpy(cmd->argv[cmd->argc-1], env_var, strlen(env_var));
+        token++;
+        break;
+      }
+      case TOKEN_LITERAL: {
         cmd->argc++;
         cmd->argv=realloc(cmd->argv, (cmd->argc)*sizeof(char*));
         cmd->argv[cmd->argc-1]=token->literal;
@@ -93,7 +106,7 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
       }
       case TOKEN_IN_FILE_REDIR:
       case TOKEN_IN_DOUBLE_REDIR: {
-        ASSERT_T(token+1, TOKEN_STRING);
+        ASSERT_T(token+1, TOKEN_LITERAL);
         if(redir==0) {
           redir=calloc(1, sizeof(struct redir_t));
           redir->flags=0;
@@ -114,7 +127,7 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
 
       case TOKEN_OUT_TRUNC_REDIR:
       case TOKEN_OUT_APPEND_REDIR: {
-        ASSERT_T(token+1, TOKEN_STRING);
+        ASSERT_T(token+1, TOKEN_LITERAL);
         if(redir==0) {
           redir=calloc(1, sizeof(struct redir_t));
           redir->flags=0;
@@ -161,7 +174,7 @@ struct node_t *build_tree(struct token_t *tokens) {
   struct node_t *stack[MAX_STACK_CAPACITY]={0};
   while(token->type != TOKEN_EOC) {
     switch(token->type) {
-      case TOKEN_STRING: {
+      case TOKEN_LITERAL: {
         struct node_t *node=calloc(1, sizeof(struct node_t));
         size_t read=parse_cmd(token, node);
         stack[stack_idx++]=node;
