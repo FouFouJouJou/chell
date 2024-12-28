@@ -5,6 +5,7 @@
 #include <lexer.h>
 #define OP_EVAL 0x0
 #define OP_NOEVAL 0x1
+#define OP_DEFAULT 0x2
 
 
 enum arg_type_t {

@@ -72,10 +72,6 @@ void printf_node(struct node_t node) {
   }
 }
 
-size_t parse_quoted_string(struct token_t *tokens, char **result, uint8_t mode) {
-  return 0;
-}
-
 size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
   struct cmd_t *cmd=calloc(1, sizeof(struct cmd_t));
   struct redir_t *redir=0;
@@ -88,15 +84,8 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
     && token->type != TOKEN_SEMI_COLON
   ) {
     switch(token->type) {
-      case TOKEN_ENV_VAR: {
-        cmd->argc++;
-        cmd->argv=realloc(cmd->argv, (cmd->argc)*sizeof(char*));
-        char *env_var=getenv(token->literal);
-        cmd->argv[cmd->argc-1]=calloc(strlen(env_var)+1, sizeof(char));
-        strncpy(cmd->argv[cmd->argc-1], env_var, strlen(env_var));
-        token++;
-        break;
-      }
+      case TOKEN_SINGLE_QUOTES_STRING:
+      case TOKEN_DOUBLE_QUOTES_STRING:
       case TOKEN_LITERAL: {
         cmd->argc++;
         cmd->argv=realloc(cmd->argv, (cmd->argc)*sizeof(char*));

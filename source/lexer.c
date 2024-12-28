@@ -9,10 +9,10 @@ char *token_type_to_string(enum token_type_t type) {
       return "TOKEN_ENV_VAR";
     case TOKEN_LITERAL:
       return "TOKEN_LITERAL";
-    case TOKEN_SINGLE_QUOTES:
-      return "TOKEN_SINGLE_QUOTES";
-    case TOKEN_DOUBLE_QUOTES:
-      return "TOKEN_DOUBLE_QUOTES";
+    case TOKEN_SINGLE_QUOTES_STRING:
+      return "TOKEN_SINGLE_QUOTES_STRING";
+    case TOKEN_DOUBLE_QUOTES_STRING:
+      return "TOKEN_DOUBLE_QUOTES_STRING";
     case TOKEN_OUT_APPEND_REDIR:
       return "TOKEN_OUT_APPEND_REDIR";
     case TOKEN_OUT_TRUNC_REDIR:
@@ -38,26 +38,17 @@ void printf_token(struct token_t token) {
   printf("TKN: (literal=%s, type=%s, len=%ld)\n", token.literal, token_type_to_string(token.type), token.len);
 }
 
-size_t lex_quotes(char *cmd, struct token_t *token) {
-  if(*cmd == '\'' || *cmd == '"') {
-    char quotes=*cmd; 
-    token->literal=strndup(cmd, 1);
-    token->len=1;
-    token->type=quotes == '\'' ? TOKEN_SINGLE_QUOTES : TOKEN_DOUBLE_QUOTES;
-    return token->len;
-  }
-  return 0;
-}
-
 size_t lex_string(char *cmd, struct token_t *token) {
-  char delimiters[]=" $\"'&><|;\n";  
-  if(*cmd == '$') {
-    size_t len=strcspn(cmd+1, delimiters);
-    token->literal=strndup(cmd+1, len);
-    token->type=TOKEN_ENV_VAR;
+  if(*cmd == '\'' || *cmd == '"') {
+    char quotes=*cmd;
+    size_t len=strcspn(cmd+1, &quotes);
+    token->literal=strndup(cmd, len+2);
+    token->type=quotes=='\'' ? TOKEN_SINGLE_QUOTES_STRING : TOKEN_DOUBLE_QUOTES_STRING;
     token->len=len;
-    return len+1;
-  } else {
+    return len+2;
+  }
+  else {
+    char delimiters[]=" \"'&><|;\n";  
     size_t len=strcspn(cmd, delimiters);
     token->literal=strndup(cmd, len);
     token->len=len;
@@ -130,7 +121,6 @@ struct token_t *lex(char *cmd, size_t len) {
     cmd_copy+=strspn(cmd_copy, " \t\r\n");
     if(cmd_copy == cmd+len) break;
     if((read=lex_string(cmd_copy, &token)));
-    else if((read=lex_quotes(cmd_copy, &token)));
     else if((read=lex_output_redirection(cmd_copy, &token)));
     else if((read=lex_input_redirection(cmd_copy, &token)));
     else if((read=lex_delimiter(cmd_copy, &token)));
