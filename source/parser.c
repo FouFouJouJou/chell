@@ -7,6 +7,35 @@
 #include <parser.h>
 #define ASSERT_T(x, t) assert((x)->type == t)
 
+char *eval_(char *literal, size_t len) {
+  char result[2048]={0};
+  size_t size=0;
+  char *character=literal;
+  while(character < literal+len) {
+    if(*character == '$') {
+      character++;
+      size_t len_=0;
+      while((*character >= 'A' && *character <= 'Z') || (*character >= 'a' && *character <= 'z')) {
+        len_++;
+        character++;
+      }
+      char var_name[100];
+      strncpy(var_name, character-len_, len_);
+      char *env_value=getenv(var_name);
+      if(env_value) {
+        size_t env_value_len=strlen(env_value);
+        size+=env_value_len;
+        strncpy(result+size-env_value_len, env_value, env_value_len);
+        result[size]='\0';
+      }
+    } else {
+      result[size++]=*character;
+      character++;
+    }
+  }
+  return strndup(result, size);
+}
+
 struct node_t *create_delim_node(struct node_t *left, struct node_t *right, enum node_type_t type) {
   struct node_t *node=calloc(1, sizeof(struct node_t));
   node->type=type;
@@ -89,7 +118,11 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
       case TOKEN_LITERAL: {
         cmd->argc++;
         cmd->argv=realloc(cmd->argv, (cmd->argc)*sizeof(char*));
-        cmd->argv[cmd->argc-1]=token->literal;
+        if(token->type != TOKEN_SINGLE_QUOTES_STRING && token-tokens > 0) {
+          cmd->argv[cmd->argc-1]=eval_(token->literal, token->len);
+          free(token->literal);
+        }
+        else cmd->argv[cmd->argc-1]=token->literal;
         token++;
         break;
       }

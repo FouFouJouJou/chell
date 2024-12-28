@@ -42,13 +42,14 @@ size_t lex_string(char *cmd, struct token_t *token) {
   if(*cmd == '\'' || *cmd == '"') {
     char quotes=*cmd;
     size_t len=strcspn(cmd+1, &quotes);
-    token->literal=strndup(cmd, len+2);
-    token->type=quotes=='\'' ? TOKEN_SINGLE_QUOTES_STRING : TOKEN_DOUBLE_QUOTES_STRING;
+    token->literal=strndup(cmd+1, len);
+    token->type=quotes=='\'' ? TOKEN_LITERAL : TOKEN_DOUBLE_QUOTES_STRING;
     token->len=len;
     return len+2;
   }
   else {
-    char delimiters[]=" \"'&><|;\n";  
+    // TODO: " " bug for options of kind option=" "
+    char delimiters[]=" &><|;\n";  
     size_t len=strcspn(cmd, delimiters);
     token->literal=strndup(cmd, len);
     token->len=len;
