@@ -40,16 +40,20 @@ void printf_token(struct token_t token) {
 
 size_t lex_string(char *cmd, struct token_t *token) {
   if(*cmd == '\'' || *cmd == '"') {
-    char quotes=*cmd;
-    size_t len=strcspn(cmd+1, &quotes);
-    token->literal=strndup(cmd+1, len);
+    char quotes=*cmd++;
+    size_t len=0;
+    // TODO: for some reason strcspn is chaotic (DEFINITELY GDB THIS LATER)
+    while(*cmd != quotes) {len++; cmd++;}
+    //size_t len=strcspn(cmd+len, &quotes);
+    token->literal=strndup(cmd-len, len);
+    printf("%s\n", token->literal);
     token->type=quotes=='\'' ? TOKEN_SINGLE_QUOTES_STRING : TOKEN_DOUBLE_QUOTES_STRING;
     token->len=len;
     return len+2;
   }
   else {
     // TODO: " " bug for options of kind option=" "
-    char delimiters[]=" &><|;\n";  
+    char delimiters[]=" &><|;\n";
     size_t len=strcspn(cmd, delimiters);
     token->literal=strndup(cmd, len);
     token->len=len;

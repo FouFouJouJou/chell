@@ -123,7 +123,8 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
           cmd->argv[cmd->argc-1]=eval_(token->literal, token->len);
           free(token->literal);
         }
-        else cmd->argv[cmd->argc-1]=token->literal;
+        else 
+          cmd->argv[cmd->argc-1]=token->literal;
         token++;
         break;
       }
