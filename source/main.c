@@ -23,6 +23,7 @@ int main(int argc, char **argv) {
     int exit_code=run_cmd(input, read);
     printf("exit code: %d\n", exit_code);
     save_to_history_buffer(input, read);
+    free(input);
   }
   return EXIT_SUCCESS;
 }

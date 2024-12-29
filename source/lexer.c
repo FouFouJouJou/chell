@@ -43,7 +43,7 @@ size_t lex_string(char *cmd, struct token_t *token) {
     char quotes=*cmd;
     size_t len=strcspn(cmd+1, &quotes);
     token->literal=strndup(cmd+1, len);
-    token->type=quotes=='\'' ? TOKEN_LITERAL : TOKEN_DOUBLE_QUOTES_STRING;
+    token->type=quotes=='\'' ? TOKEN_SINGLE_QUOTES_STRING : TOKEN_DOUBLE_QUOTES_STRING;
     token->len=len;
     return len+2;
   }
@@ -131,10 +131,9 @@ struct token_t *lex(char *cmd, size_t len) {
     idx++;
     tokens=realloc(tokens, idx*sizeof(struct token_t));
     tokens[idx-1]=token;
-    cmd_copy+=read;
     printf_token(token);
+    cmd_copy+=read;
   }
-  printf("done\n");
   idx++;
   tokens=realloc(tokens, idx*sizeof(struct token_t));
   tokens[idx-1].type=TOKEN_EOC;

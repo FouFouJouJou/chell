@@ -19,10 +19,11 @@ char *eval_(char *literal, size_t len) {
         len_++;
         character++;
       }
-      char var_name[100];
+      char var_name[100]={0};
       strncpy(var_name, character-len_, len_);
       char *env_value=getenv(var_name);
-      if(env_value) {
+      if(env_value != 0) {
+        printf("%s=%s\n", var_name, env_value);
         size_t env_value_len=strlen(env_value);
         size+=env_value_len;
         strncpy(result+size-env_value_len, env_value, env_value_len);
