@@ -85,6 +85,7 @@ void printf_env_node(struct node_t node) {
     if(i+1 != env->size) printf(", ");
   }
   printf("]\n");
+  printf_node(*env->cmd);
 }
 
 void printf_node(struct node_t node) {
@@ -240,18 +241,19 @@ struct node_t *build_tree(struct token_t *tokens) {
           assert(stack_idx == 1);
           token+=parse_env(token, stack[stack_idx-1]);
           break;
-        }
-
-        struct node_t *node=calloc(1, sizeof(struct node_t *));
-        read=parse_cmd(token, node);
-        if(stack_idx > 0 && stack[stack_idx-1]->type == NODE_ENV) {
-          struct env_t *env=(struct env_t *)node->data;
-          env->cmd=node;
-          env_node=0;
         } else {
-          stack[stack_idx++]=node;
+          struct node_t *node=calloc(1, sizeof(struct node_t *));
+          read=parse_cmd(token, node);
+          if(stack_idx > 0 && stack[stack_idx-1]->type == NODE_ENV) {
+            struct env_t *env=(struct env_t *)stack[stack_idx-1]->data;
+            env->cmd=node;
+            env_node=0;
+          } else {
+            stack[stack_idx++]=node;
+          }
+          token+=read;
+          assert(stack_idx == 1);
         }
-        token+=read;
         break;
       }
       case TOKEN_PIPE:
@@ -275,6 +277,15 @@ struct node_t *build_tree(struct token_t *tokens) {
 
 void free_node(struct node_t *node) {
   switch(node->type) {
+    case NODE_ENV: {
+      struct env_t *env=(struct env_t *)node->data;
+      free_node(env->cmd);
+      for(int i=0; i<env->size; ++i) {
+        free(env->keys[i]);
+        free(env->values[i]);
+      }
+      break;
+    }
     case NODE_CMD: {
       struct cmd_t *cmd=(struct cmd_t *)node->data;
       free(cmd->executable);

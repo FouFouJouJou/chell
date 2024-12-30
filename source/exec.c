@@ -34,16 +34,36 @@ int get_here_document(char **buffer, char *tag) {
 int run_cmd(char *cmd, size_t len) {
   struct token_t *tokens=lex(cmd, len);
   struct node_t *head=parse(tokens);
-  //int exit_code=run(head);
-  //free_tree(head);
-  //free(tokens);
-  //return exit_code;
-  printf_tree(head, 0, printf_node);
-  return 0;
+  int exit_code=run(head);
+  free_tree(head);
+  free(tokens);
+  return exit_code;
 }
 
 int run(struct node_t *node) {
   switch(node->type) {
+    case NODE_ENV: {
+      struct env_t *env=(struct env_t *)node->data;
+      if(env->cmd == 0) {
+        for(int i=0; i<env->size; ++i) {
+          setenv(env->keys[i], env->values[i], 1);
+        }
+        return 0;
+      }
+      pid_t process=fork();
+      if(process == 0) {
+        for(int i=0; i<env->size; ++i) {
+          setenv(env->keys[i], env->values[i], 1);
+        }
+        exit(run(env->cmd));
+      }
+      int status;
+      if(waitpid(process, &status, WUNTRACED) == -1) exit(70);
+      if(WIFEXITED(status)) {
+        return WEXITSTATUS(status);
+      }
+    }
+
     case NODE_PIPE: {
       int p[2], left_status, right_status;
       if(pipe(p) == -1) exit(71);
