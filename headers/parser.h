@@ -7,13 +7,6 @@
 #define OP_NOEVAL 0x1
 #define OP_DEFAULT 0x2
 
-
-enum arg_type_t {
-  ARG_CMD
-  ,ARG_ENV_VAR
-  ,ARG_STRING
-};
-
 enum node_type_t {
   NODE_PIPE
   ,NODE_AND
@@ -21,6 +14,7 @@ enum node_type_t {
   ,NODE_CMD
   ,NODE_REDIR
   ,NODE_UNSUPPORTED
+  ,NODE_ENV
 };
 
 struct node_t {
@@ -30,9 +24,11 @@ struct node_t {
   struct node_t *left;
 };
 
-struct arg_t {
-  void *data;
-  enum arg_type_t type;
+struct env_t {
+  char *keys[100];
+  char *values[100];
+  size_t size;
+  struct node_t *cmd;
 };
 
 struct cmd_t {

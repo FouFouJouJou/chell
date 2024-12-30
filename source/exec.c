@@ -34,10 +34,12 @@ int get_here_document(char **buffer, char *tag) {
 int run_cmd(char *cmd, size_t len) {
   struct token_t *tokens=lex(cmd, len);
   struct node_t *head=parse(tokens);
-  int exit_code=run(head);
-  free_tree(head);
-  free(tokens);
-  return exit_code;
+  //int exit_code=run(head);
+  //free_tree(head);
+  //free(tokens);
+  //return exit_code;
+  printf_tree(head, 0, printf_node);
+  return 0;
 }
 
 int run(struct node_t *node) {
@@ -63,18 +65,17 @@ int run(struct node_t *node) {
       }
       close(p[0]);
       close(p[1]);
+
       if(waitpid(left_process, &left_status, WUNTRACED) == -1) exit(70);
       if(WIFEXITED(left_status)) {
-        int status_code=WEXITSTATUS(left_status);
-        if(status_code) exit(status_code);
+        return WEXITSTATUS(left_status);
       }
       if(waitpid(right_process, &right_status, WUNTRACED) == -1) exit(70);
       if(WIFEXITED(right_status)) {
-        int status_code=WEXITSTATUS(right_status);
-        if(status_code) exit(status_code);
+        return WEXITSTATUS(right_status);
       }
-      return 0;
     }
+
     case NODE_SEMI_COLON: {
       int left_status, right_status;
       pid_t left_process=fork();
@@ -82,7 +83,6 @@ int run(struct node_t *node) {
         exit(run(node->left));
       }
       if(waitpid(left_process, &left_status, WUNTRACED) == -1) exit(70);
-
       pid_t right_process=fork();
       if(right_process == 0) {
         exit(run(node->right));
@@ -93,6 +93,7 @@ int run(struct node_t *node) {
       }
       break;
     }
+
     case NODE_AND: {
       int left_status, right_status;
       pid_t left_process=fork();
@@ -112,6 +113,7 @@ int run(struct node_t *node) {
       }
       break;
     }
+
     case NODE_REDIR: {
       struct redir_t *redir=(struct redir_t*)node->data;
       pid_t process=fork();
@@ -155,6 +157,7 @@ int run(struct node_t *node) {
       }
       break;
     }
+
     case NODE_CMD: {
       struct cmd_t *cmd=(struct cmd_t *)node->data;
       if(is_builtin(cmd->executable))

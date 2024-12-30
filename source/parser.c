@@ -23,7 +23,6 @@ char *eval_(char *literal, size_t len) {
       strncpy(var_name, character-len_, len_);
       char *env_value=getenv(var_name);
       if(env_value != 0) {
-        printf("%s=%s\n", var_name, env_value);
         size_t env_value_len=strlen(env_value);
         size+=env_value_len;
         strncpy(result+size-env_value_len, env_value, env_value_len);
@@ -78,6 +77,16 @@ void printf_redir_node(struct node_t node) {
   }
 }
 
+void printf_env_node(struct node_t node) {
+  printf("ENV: [");
+  struct env_t *env=(struct env_t*)node.data;
+  for(int i=0; i<env->size; ++i) {
+    printf("%s=%s", env->keys[i], env->values[i]);
+    if(i+1 != env->size) printf(", ");
+  }
+  printf("]\n");
+}
+
 void printf_node(struct node_t node) {
   switch(node.type) {
     case NODE_PIPE:
@@ -94,6 +103,9 @@ void printf_node(struct node_t node) {
       break;
     case NODE_REDIR:
       printf_redir_node(node);
+      break;
+    case NODE_ENV:
+      printf_env_node(node);
       break;
     case NODE_UNSUPPORTED:
       exit(73);
@@ -192,16 +204,53 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
   return token-tokens;
 }
 
+size_t parse_env(struct token_t *token, struct node_t *node) {
+  struct env_t *env=(struct env_t *)node->data;
+  char *literal=token->literal;
+  size_t key_len=strcspn(literal, "=");
+  env->keys[env->size]=calloc(key_len, sizeof(char));
+  strncpy(env->keys[env->size], token->literal, key_len);
+  literal+=key_len;
+  env->values[env->size]=calloc(literal-token->literal, sizeof(char));
+  strncpy(env->values[env->size], literal+1, literal-token->literal);
+  env->size++;
+  return 1;
+}
+
 struct node_t *build_tree(struct token_t *tokens) {
   struct token_t *token=tokens;
   int stack_idx=0;
   struct node_t *stack[MAX_STACK_CAPACITY]={0};
+  struct node_t *env_node=0;
   while(token->type != TOKEN_EOC) {
+    size_t read=0;
     switch(token->type) {
       case TOKEN_LITERAL: {
-        struct node_t *node=calloc(1, sizeof(struct node_t));
-        size_t read=parse_cmd(token, node);
-        stack[stack_idx++]=node;
+        if(token->literal[0] != '$' && strchr(token->literal, '=') != 0) {
+          if(env_node == 0) {
+            env_node=calloc(1, sizeof(struct node_t *));
+            struct env_t *env=calloc(1, sizeof(struct env_t));
+            env->cmd=0;
+            env->size=0;
+            env_node->data=env;
+            env_node->left=env_node->right=0;
+            env_node->type=NODE_ENV;
+            stack[stack_idx++]=env_node;
+          }
+          assert(stack_idx == 1);
+          token+=parse_env(token, stack[stack_idx-1]);
+          break;
+        }
+
+        struct node_t *node=calloc(1, sizeof(struct node_t *));
+        read=parse_cmd(token, node);
+        if(stack_idx > 0 && stack[stack_idx-1]->type == NODE_ENV) {
+          struct env_t *env=(struct env_t *)node->data;
+          env->cmd=node;
+          env_node=0;
+        } else {
+          stack[stack_idx++]=node;
+        }
         token+=read;
         break;
       }
