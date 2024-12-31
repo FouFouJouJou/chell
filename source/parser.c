@@ -205,15 +205,19 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
   return token-tokens;
 }
 
+// TODO: make this look better somehow
 size_t parse_env(struct token_t *token, struct node_t *node) {
   struct env_t *env=(struct env_t *)node->data;
   char *literal=token->literal;
   size_t key_len=strcspn(literal, "=");
-  env->keys[env->size]=calloc(key_len, sizeof(char));
+  env->keys[env->size]=calloc(key_len+1, sizeof(char));
   strncpy(env->keys[env->size], token->literal, key_len);
-  literal+=key_len;
-  env->values[env->size]=calloc(literal-token->literal, sizeof(char));
-  strncpy(env->values[env->size], literal+1, literal-token->literal);
+  env->keys[env->size][key_len]='\0';
+  literal+=key_len+1;
+  size_t value_len=token->len-key_len-1;
+  env->values[env->size]=calloc(value_len+1, sizeof(char));
+  strncpy(env->values[env->size], literal, value_len+1);
+  env->values[env->size][value_len]='\0';
   env->size++;
   return 1;
 }

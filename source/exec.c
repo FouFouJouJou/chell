@@ -35,8 +35,8 @@ int run_cmd(char *cmd, size_t len) {
   struct token_t *tokens=lex(cmd, len);
   struct node_t *head=parse(tokens);
   int exit_code=run(head);
-  free_tree(head);
-  free(tokens);
+  //free_tree(head);
+  //free(tokens);
   return exit_code;
 }
 
