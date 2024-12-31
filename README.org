@@ -17,13 +17,13 @@
     - [X] ;
     - [X] ||
   - [ ] extra features [0/6]
-    - [ ] builtins [0/?]
+    - [ ] builtins [3/?]
       - [X] history
       - [X] cd
       - [X] exit
     - [X] history [2/2]
-      - [X] saving
-      - [X] synching
+      - [X] in-memory store
+      - [X] fs synching
     - [ ] jobs
     - [ ] autocompletion
     - [X] environment variables
