@@ -26,7 +26,7 @@
       - [X] synching
     - [ ] jobs
     - [ ] autocompletion
-    - [ ] environment variables
+    - [X] environment variables
     - [ ] process substitution
     - [ ] sub-command arguments
     - [ ] config file
