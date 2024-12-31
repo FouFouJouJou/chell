@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <lexer.h>
 #include <parser.h>
+#include <env.h>
 #define ASSERT_T(x, t) assert((x)->type == t)
 
 char *eval_(char *literal, size_t len) {
@@ -13,7 +14,16 @@ char *eval_(char *literal, size_t len) {
   char *character=literal;
   while(character < literal+len) {
     if(*character == '$') {
+      // check builtin variables $#, $?, etc...
       character++;
+      if(*character == '?') {
+        char c[3];
+        sprintf(c, "%d", last_exit_code); 
+        size+=3;
+        strcat(result, c);
+        character++;
+        break;
+      }
       size_t len_=0;
       while((*character >= 'A' && *character <= 'Z') || (*character >= 'a' && *character <= 'z')) {
         len_++;

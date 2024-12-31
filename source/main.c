@@ -6,6 +6,7 @@
 #include <exec.h>
 #include <history.h>
 #include <builtin.h>
+#include <env.h>
 
 int main(int argc, char **argv) {
   read_history_from_fs(0);
@@ -21,9 +22,8 @@ int main(int argc, char **argv) {
       exit(0);
     }
     int exit_code=run_cmd(input, read);
-    printf("exit code: %d\n", exit_code);
+    last_exit_code=exit_code;
     save_to_history_buffer(input, read);
-    free(input);
   }
   return EXIT_SUCCESS;
 }

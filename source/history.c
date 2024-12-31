@@ -20,6 +20,7 @@ void save_to_history_buffer(char *cmd, size_t len) {
   }
   history_buffer[idx++]=cmd;
 }
+
 ssize_t read_history_from_fs(char *path) { 
   if(path == 0) path=HISTORY_PATH;
   int fd=open(path, O_RDONLY, S_IRUSR);
