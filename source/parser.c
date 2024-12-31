@@ -117,6 +117,7 @@ void printf_node(struct node_t node) {
 
 size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
   struct cmd_t *cmd=calloc(1, sizeof(struct cmd_t));
+  cmd->argc=0;
   struct redir_t *redir=0;
   struct token_t *token=tokens;
   assert(token->type == TOKEN_LITERAL);
@@ -185,7 +186,7 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
   }
 
   cmd->argc++;
-  cmd->argv=realloc(cmd->argv, (cmd->argc)*sizeof(char*));
+  cmd->argv=realloc(cmd->argv, cmd->argc*sizeof(char*));
   cmd->argv[cmd->argc-1]=0;
 
   if(redir != 0) {
@@ -246,7 +247,7 @@ struct node_t *build_tree(struct token_t *tokens) {
           token+=parse_env(token, stack[stack_idx-1]);
           break;
         } else {
-          struct node_t *node=calloc(1, sizeof(struct node_t *));
+          struct node_t *node=calloc(1, sizeof(struct node_t));
           read=parse_cmd(token, node);
           if(stack_idx > 0 && stack[stack_idx-1]->type == NODE_ENV) {
             struct env_t *env=(struct env_t *)stack[stack_idx-1]->data;
@@ -297,7 +298,6 @@ void free_node(struct node_t *node) {
         free(cmd->argv[i]);
       }
       free(cmd->argv);
-      free(cmd);
       break;
     }
     case NODE_REDIR: {
@@ -308,11 +308,11 @@ void free_node(struct node_t *node) {
         free(redir->output_file);
       if(redir->error_file)
         free(redir->error_file);
-      free(redir);
       free_node(redir->cmd);
       break;
     }
   }
+  free(node->data);
   free(node);
 }
 
