@@ -192,6 +192,9 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
         token++;
         break;
       }
+      case TOKEN_ERROR_REDIR: {
+        break;
+      }
     }
   }
 
