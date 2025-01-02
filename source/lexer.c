@@ -54,7 +54,7 @@ size_t lex_string(char *cmd, struct token_t *token) {
   }
   else {
     // TODO: " " bug for options of kind option=" "
-    char delimiters[]=" &><|;\n";
+    char delimiters[]=" ><|;\n";
     size_t len=strcspn(cmd, delimiters);
     token->literal=strndup(cmd, len);
     token->len=len;
@@ -65,13 +65,13 @@ size_t lex_string(char *cmd, struct token_t *token) {
 
 size_t lex_error_redirection(char *cmd, struct token_t *token) {
   if(!strncmp(cmd, "2>", 2)) {
-    size_t len=strcspn(cmd+2, " \n");
+    size_t len=strcspn(cmd, " \n");
     char *redirection_stream=calloc(1, len*sizeof(char));
-    strncpy(redirection_stream, cmd+2, len);
+    strncpy(redirection_stream, cmd, len);
     token->literal=redirection_stream;
     token->type=TOKEN_ERROR_REDIR;
     token->len=len;
-    return token->len+2;
+    return token->len;
   }
   return 0;
 }
@@ -151,7 +151,6 @@ struct token_t *lex(char *cmd, size_t len) {
     tokens=realloc(tokens, idx*sizeof(struct token_t));
     tokens[idx-1]=token;
     cmd_copy+=read;
-    printf_token(token);
   }
   idx++;
   tokens=realloc(tokens, idx*sizeof(struct token_t));

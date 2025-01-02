@@ -4,14 +4,14 @@
 - [[https://tldp.org/LDP/abs/html/here-docs.html][Here documents]]
 
 * TODO Functionality [0/2]
-  - [ ] general features [6/7]
+  - [X] general features [7/7]
     - [X] string literals
     - [X] I/O redirections [4/4]
       - [X] >
       - [X] >>
       - [X] <
       - [X] <<
-    - [ ] error redirection
+    - [X] error redirection
     - [X] pipes
     - [X] &&
     - [X] ;

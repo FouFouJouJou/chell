@@ -33,13 +33,11 @@ int get_here_document(char **buffer, char *tag) {
 
 int run_cmd(char *cmd, size_t len) {
   struct token_t *tokens=lex(cmd, len);
-  //struct node_t *head=parse(tokens);
-  //printf_tree(head, 0, printf_node);
-  return 0;
-  //int exit_code=run(head);
-  //free_tree(head);
-  //free(tokens);
-  //return exit_code;
+  struct node_t *head=parse(tokens);
+  int exit_code=run(head);
+  free_tree(head);
+  free(tokens);
+  return exit_code;
 }
 
 int run(struct node_t *node) {
@@ -142,7 +140,7 @@ int run(struct node_t *node) {
       pid_t process=fork();
       if(process == 0) {
         if(redir->output_file != 0) {
-          int flags=O_WRONLY|(redir->flags & 0x01 ? O_APPEND : 0);
+          int flags=O_WRONLY|(redir->flags & 0x01 ? O_APPEND : O_TRUNC);
           int fd=open(redir->output_file, O_CREAT|flags, S_IWUSR|S_IRUSR);
           if((fd == -1) && (EEXIST == errno)) {
             fd = open(redir->output_file, flags, S_IWUSR|S_IRUSR);
@@ -168,8 +166,19 @@ int run(struct node_t *node) {
           if(dup2(fd, STDIN_FILENO) == -1) exit(69);
           if(close(fd) == -1) exit(69);
         }
+        if(redir->error_file != 0) {
+          int fd=open(redir->error_file, O_CREAT|O_WRONLY|O_TRUNC, S_IWUSR|S_IRUSR);
+          if((fd == -1) && (EEXIST == errno)) {
+            fd = open(redir->error_file, O_TRUNC|O_WRONLY, S_IWUSR|S_IRUSR);
+          }
+          if(dup2(fd, STDERR_FILENO) == -1) exit(72);
+        }
+        else if(redir->flags >> 7 == 1) {
+          if(dup2(redir->efd, STDERR_FILENO) == -1) exit(72);
+        }
         exit(run(redir->cmd));
       }
+
       int status;
       if(waitpid(process, &status, WUNTRACED) == -1) exit(70);
       if(redir->here_tag) {
@@ -189,7 +198,7 @@ int run(struct node_t *node) {
       pid_t process=fork();
       if(process == 0) {
         if(execvp(cmd->executable, cmd->argv) == -1) {
-          printf("Nope\n");
+          write(STDERR_FILENO, "Nope\n", 5);
           exit(72);
         }
       }

@@ -85,6 +85,15 @@ void printf_redir_node(struct node_t node) {
     char *in_symbol=((redir->flags & 0x10)>>4) ? "<<" : "<";
     printf("%d %s %s\n", (redir->flags & 0x10)>>4, in_symbol, redir->here_tag);
   }
+
+  if(redir->error_file) {
+    printf("2>%s\n", redir->error_file);
+  }
+
+  if(redir->flags >> 7 == 1) {
+    printf("2>%d\n", redir->efd);  
+  }
+  printf_node(*redir->cmd);
 }
 
 void printf_env_node(struct node_t node) {
@@ -192,7 +201,32 @@ size_t parse_cmd(struct token_t *tokens, struct node_t *node) {
         token++;
         break;
       }
+
       case TOKEN_ERROR_REDIR: {
+        if(redir==0) {
+          redir=calloc(1, sizeof(struct redir_t));
+          redir->flags=0;
+        }
+        if(token->len == 2) {
+          free(token->literal);
+          token++;
+          ASSERT_T(token, TOKEN_LITERAL);
+          if(token->literal[0] == '&') exit(88);
+          redir->error_file=token->literal;
+        }
+        else {
+          char *redirection=token->literal+2;
+          if(redirection[0] == '&') {
+            redir->efd=strtol(redirection+1, 0, 10);
+            redir->flags|=(1<<7);
+            free(token->literal);
+          }
+          else {
+            redir->error_file=redirection;
+            redir->flags|=(0<<7);
+          }
+        }
+        token++;
         break;
       }
     }

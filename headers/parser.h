@@ -40,6 +40,7 @@ struct cmd_t {
 struct redir_t {
   char *input_file, *output_file, *error_file;
   char *here_tag;
+  int efd;
   uint8_t flags;
   struct node_t *cmd;
 };
