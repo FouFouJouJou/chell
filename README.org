@@ -3,7 +3,7 @@
 - [[https://en.wikipedia.org/wiki/Pipeline_(Unix)][Unix pipes internals]]
 - [[https://tldp.org/LDP/abs/html/here-docs.html][Here documents]]
 
-* TODO Functionality [0/2]
+* TODO Functionality [1/2]
   - [X] general features [7/7]
     - [X] string literals
     - [X] I/O redirections [4/4]
@@ -16,7 +16,7 @@
     - [X] &&
     - [X] ;
     - [X] ||
-  - [ ] extra features [0/6]
+  - [ ] extra features [2/6]
     - [ ] builtins [3/?]
       - [X] history
       - [X] cd
